@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <!-- GitHub Pages frontend. Backend API runs via HTTPS Cloudflare Worker -> Google Apps Script. -->
+  <!-- Source hosted on GitHub; rendered by Apps Script to retain google.script.run. -->
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -46,6 +46,12 @@
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:21px}.stat{border-radius:16px;padding:19px 21px;background:#fff;border:1px solid #e6eee8}.stat-label{font-size:12px;color:#77877b}.stat-value{font:600 30px/1.4 'Prompt',sans-serif;margin-top:4px;color:#184d39}.stat:nth-child(2) .stat-value{color:#b1812e}
     .record-card{padding:23px}.record-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}.record-tools h2{font:600 17px 'Prompt',sans-serif;margin:0}.search{height:43px;width:270px;max-width:100%;border:1px solid #e0e9e2;border-radius:10px;padding:10px 12px;outline:none}.search:focus{border-color:#47a57d}
     .table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:650px;text-align:left}th{font-size:12px;color:#819088;font-weight:600;background:#f7faf7;padding:13px 14px}td{padding:15px 14px;border-top:1px solid #eff2f0;font-size:13px;vertical-align:middle}.name-cell{font-weight:600;color:#283a30}.status-badge{font-size:11px;font-weight:700;white-space:nowrap;border-radius:100px;padding:5px 10px}.status-badge.new{background:#fdf4dd;color:#94661c}.status-badge.finished{background:#e8f7ed;color:#217c51}.table-actions{display:flex;gap:7px}.sm-btn{border:1px solid #dce8df;background:#fff;color:#267052;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap}.sm-btn:hover{background:#eef8f1}.sm-btn.danger{color:#b54545;border-color:#f2d8d8}.sm-btn.danger:hover{background:#fff1f1}
+    .bulk-toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:8px 0 15px}
+    .bulk-toolbar .sm-btn{min-height:38px}.bulk-count{font-size:12px;color:#526d5c;margin-right:auto}
+    .bulk-toolbar .sm-btn.danger{background:#b32634;color:#fff;border-color:#b32634}
+    .bulk-toolbar .sm-btn.danger:hover:not(:disabled){background:#911a27}
+    .bulk-toolbar .sm-btn:disabled{opacity:.48;cursor:not-allowed}
+    .select-cell{width:40px;text-align:center}.select-cell input{width:17px;height:17px;accent-color:#177650;cursor:pointer}
     .paging{display:flex;justify-content:flex-end;gap:9px;align-items:center;margin-top:17px;color:#7b8d80;font-size:12px}.paging .sm-btn{min-width:74px}.empty-state{text-align:center;padding:50px 16px;color:#8a9990;font-size:13px}.admin-message{font-size:12px;color:#788b7b;margin:6px 0 20px}
     .overlay{position:fixed;inset:0;z-index:10;background:rgba(5,28,18,.62);display:flex;justify-content:center;align-items:center;padding:18px}.modal{max-width:580px;width:100%;background:#fff;border-radius:18px;padding:23px;max-height:94vh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px;gap:10px}.modal-head h3{font:600 17px 'Prompt',sans-serif;margin:0}.modal img{width:100%;max-height:67vh;object-fit:contain;background:#f4f7f4;border-radius:11px}.icon-btn{width:36px;height:36px;border:1px solid #e1e9e3;border-radius:10px;background:#fff;font-size:22px;line-height:1}
     @media(max-width:900px){.content-grid{grid-template-columns:minmax(0,1fr) 310px;gap:18px}.form-card{padding:28px}.side-card{padding:22px}.photo-frame{max-height:310px}.hero .shell{padding-bottom:80px}}
@@ -192,7 +198,7 @@
     <section id="adminDashboard" class="hide">
       <div class="admin-toolbar"><span class="whoami" id="currentAccount">กำลังตรวจสอบบัญชี…</span><button type="button" class="settings-btn" id="settingsToggle">⚙ ตั้งค่าบัญชีและสิทธิ์</button></div>
       <div class="stats"><div class="stat"><div class="stat-label">รายการทั้งหมด</div><div id="totalCount" class="stat-value">—</div></div><div class="stat"><div class="stat-label">รอดำเนินการ</div><div id="newCount" class="stat-value">—</div></div><div class="stat"><div class="stat-label">ดำเนินการแล้ว</div><div id="doneCount" class="stat-value">—</div></div></div>
-      <div class="card record-card"><div class="record-tools"><h2>รายการรูปภาพที่ได้รับ</h2><input id="searchInput" class="search" type="search" placeholder="ค้นหาชื่อ–นามสกุล…" aria-label="ค้นหาชื่อบุคลากร"></div><div id="adminNotice" class="admin-message" aria-live="polite">ข้อมูลรูปภาพเก็บไว้ใน Google Drive แบบส่วนตัว</div><div class="table-scroll"><table><thead><tr><th>ชื่อ–นามสกุล</th><th>วันที่ส่ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="recordsBody"><tr><td colspan="4" class="empty-state">กำลังโหลดข้อมูล…</td></tr></tbody></table></div><div class="paging"><button type="button" class="sm-btn page-btn" id="prevPage">ก่อนหน้า</button><span id="pageNumber">1 / 1</span><button type="button" class="sm-btn page-btn" id="nextPage">ถัดไป</button></div></div>
+      <div class="card record-card"><div class="record-tools"><h2>รายการรูปภาพที่ได้รับ</h2><input id="searchInput" class="search" type="search" placeholder="ค้นหาชื่อ–นามสกุล…" aria-label="ค้นหาชื่อบุคลากร"></div><div id="bulkToolbar" class="bulk-toolbar hide"><span id="bulkSelectedCount" class="bulk-count">ยังไม่ได้เลือกรายการ</span><button type="button" class="sm-btn view" id="selectAllResults">เลือกทั้งหมด</button><button type="button" class="sm-btn page-btn" id="clearSelection">ยกเลิกการเลือก</button><button type="button" class="sm-btn danger" id="bulkDeleteSelected">ลบรายการที่เลือก</button><button type="button" class="sm-btn danger" id="bulkDeleteAll">ลบข้อมูลทั้งหมด</button></div><div id="adminNotice" class="admin-message" aria-live="polite">ข้อมูลรูปภาพเก็บไว้ใน Google Drive แบบส่วนตัว</div><div class="table-scroll"><table><thead><tr><th class="select-cell" id="selectHeader"></th><th>ชื่อ–นามสกุล</th><th>วันที่ส่ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="recordsBody"><tr><td colspan="5" class="empty-state">กำลังโหลดข้อมูล…</td></tr></tbody></table></div><div class="paging"><button type="button" class="sm-btn page-btn" id="prevPage">ก่อนหน้า</button><span id="pageNumber">1 / 1</span><button type="button" class="sm-btn page-btn" id="nextPage">ถัดไป</button></div></div>
     </section>
   </div></main>
   <footer class="footer">© ระบบรับรูปภาพบุคลากรสำหรับเว็บไซต์วิทยาลัย · พัฒนาสำหรับการจัดการข้อมูลภายในสถานศึกษา</footer>
@@ -258,52 +264,22 @@
     const $ = id => document.getElementById(id);
     const state = {
       ready:false, busy:false, photoProcessing:false, imageData:'', previewData:'', imageName:'',
-      token:'', page:1, pages:1, search:'', loading:false, records:[],
+      token:'', page:1, pages:1, search:'', loading:false, records:[], selection:new Set(), selectedAll:false, matchingCount:0,
       adminBusy:false, modalRequest:0, listPending:false, listLoaded:false,role:'',username:'',displayName:'',currentPhotoId:'',previewCache:new Map()
     };
     let searchTimeout = null;
-    // GitHub Pages calls Cloudflare Worker over HTTPS; Apps Script remains the private backend.
-    // apiBaseUrl is public configuration, never a password or access token.
     const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || 'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api').trim();
-    const API_METHODS = new Set([
-      'getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile',
-      'adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser',
-      'adminDeleteUser','adminList','adminGetImage','adminStorePreview',
-      'adminDownloadImage','adminUpdateStatus','adminDelete'
-    ]);
-    function validatedEndpoint(){
-      if(!apiEndpoint || apiEndpoint.includes('YOUR_WORKER')) {
-        throw new Error('ยังไม่ได้เชื่อมต่อ API กรุณาให้ผู้ดูแลตั้งค่า URL ของ Cloudflare Worker ในไฟล์ config.js');
-      }
-      let url;
-      try { url = new URL(apiEndpoint); } catch(e) { throw new Error('URL ของ API ไม่ถูกต้อง'); }
-      if(url.protocol !== 'https:' || url.username || url.password || url.hash || url.search || url.pathname !== '/api'){
-        throw new Error('URL ของ API ต้องเป็น HTTPS และลงท้ายด้วย /api');
-      }
-      return url.href;
-    }
+    const API_METHODS = new Set(['getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile','adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser','adminDeleteUser','adminList','adminGetImage','adminStorePreview','adminDownloadImage','adminUpdateStatus','adminDelete']);
     async function run(method,...args){
-      if(!API_METHODS.has(method)) throw new Error('คำสั่งไม่รองรับ');
-      const url=validatedEndpoint();
-      const controller=new AbortController();
-      const timeout=setTimeout(()=>controller.abort(),method==='saveSubmission'||method==='adminDownloadImage'?115000:65000);
+      if(!API_METHODS.has(method))throw new Error('คำสั่งไม่รองรับ');
+      const ctrl=new AbortController(),clock=setTimeout(()=>ctrl.abort(),method==='saveSubmission'?115000:65000);
       try{
-        const response=await fetch(url,{
-          method:'POST',mode:'cors',cache:'no-store',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({method,args}),signal:controller.signal
-        });
-        let result;
-        try {result=await response.json();}catch(_){throw new Error('API ตอบกลับไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า Worker และ Apps Script');}
-        if(!response.ok||!result||!result.ok){
-          throw new Error(String(result?.error||'ไม่สามารถติดต่อระบบได้'));
-        }
-        return result.data;
-      }catch(error){
-        if(error?.name==='AbortError')throw new Error('การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่');
-        if(error instanceof TypeError)throw new Error('เชื่อมต่อ API ไม่สำเร็จ กรุณาตรวจสอบ URL Worker และอินเทอร์เน็ต');
-        throw error;
-      }finally{clearTimeout(timeout);}
+        const response=await fetch(apiEndpoint,{method:'POST',mode:'cors',cache:'no-store',headers:{'Content-Type':'application/json'},body:JSON.stringify({method,args}),signal:ctrl.signal});
+        const data=await response.json();
+        if(!response.ok||!data||!data.ok)throw new Error(String(data?.error||'ไม่สามารถติดต่อระบบได้'));
+        return data.data;
+      }catch(e){if(e.name==='AbortError')throw new Error('การเชื่อมต่อใช้เวลานานเกินไป');throw e;}
+      finally{clearTimeout(clock);}
     }
     const errorText = e => (e && e.message) ? e.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่';
     function notice(element,message,type='error'){element.textContent=message;element.className='notice '+type;}
@@ -458,7 +434,7 @@
       if(state.token)refreshRecords();
     });
     function forceLogout(){
-      state.token='';state.role='';state.username='';state.displayName='';state.records=[];state.listPending=false;state.listLoaded=false;state.previewCache.clear();
+      state.token='';state.role='';state.username='';state.displayName='';state.records=[];state.selection.clear();state.selectedAll=false;state.matchingCount=0;state.listPending=false;state.listLoaded=false;state.previewCache.clear();
       closeResetPassword();state.adminBusy=false;closeSettings();$('changePasswordForm').reset();$('createUserForm').reset();
       $('adminLoginPanel').classList.remove('hide');$('adminDashboard').classList.add('hide');
       $('logoutButton').classList.add('hide');$('adminUsername').value='';$('adminPassword').value='';closeImage();
@@ -474,12 +450,12 @@
       if(state.loading){state.listPending=true;return;}
       const token=state.token;
       state.loading=true;adminMessage('กำลังโหลดข้อมูลจากฐานข้อมูล…',true);
-      if(!state.listLoaded){$('recordsBody').innerHTML='<tr><td colspan="4" class="empty-state"><span class="inline-spinner" aria-hidden="true"></span> กำลังโหลดรายการ…</td></tr>';}
+      if(!state.listLoaded){$('recordsBody').innerHTML='<tr><td colspan="5" class="empty-state"><span class="inline-spinner" aria-hidden="true"></span> กำลังโหลดรายการ…</td></tr>';}
       $('prevPage').disabled=true;$('nextPage').disabled=true;
       try{
         const result=await run('adminList',token,state.page,state.search);
         if(state.token!==token)return;
-        state.page=result.page;state.pages=result.pages;state.records=result.items;state.listLoaded=true;
+        state.page=result.page;state.pages=result.pages;state.records=result.items;state.matchingCount=result.matching;state.listLoaded=true;
         $('totalCount').textContent=result.totals.all;
         $('newCount').textContent=result.totals.fresh;
         $('doneCount').textContent=result.totals.done;
@@ -515,24 +491,96 @@
     }
     function renderRecords(){
       const body=$('recordsBody');body.replaceChildren();
-      if(!state.records.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=4;td.className='empty-state';td.textContent='ยังไม่มีรายการที่ตรงกับการค้นหา';tr.append(td);body.append(tr);}
+      if(!state.records.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;td.className='empty-state';td.textContent='ยังไม่มีรายการที่ตรงกับการค้นหา';tr.append(td);body.append(tr);}
       state.records.forEach(record=>{
-        const tr=document.createElement('tr');const name=document.createElement('td');name.className='name-cell';name.textContent=record.name;
+        const tr=document.createElement('tr');
+        const checkCell=document.createElement('td');checkCell.className='select-cell';
+        if(state.role==='owner'){
+          const cb=document.createElement('input');cb.type='checkbox';cb.setAttribute('aria-label','เลือกรายการ '+record.name);
+          cb.checked=state.selectedAll||state.selection.has(record.id);
+          cb.addEventListener('change',()=>{state.selectedAll=false;if(cb.checked)state.selection.add(record.id);else state.selection.delete(record.id);updateBulkToolbar();});
+          checkCell.append(cb);
+        }
+        const name=document.createElement('td');name.className='name-cell';name.textContent=record.name;
         const date=document.createElement('td');date.textContent=record.date;
         const status=document.createElement('td');const badge=document.createElement('span');badge.className='status-badge '+(record.status==='ใหม่'?'new':'finished');badge.textContent=record.status;status.append(badge);
         const actions=document.createElement('td');const area=document.createElement('div');area.className='table-actions';
         area.append(makeAction('ดูรูป',()=>showImage(record.id),'view'));
         if(state.role==='owner'||state.role==='editor')area.append(makeAction(record.status==='ใหม่'?'เสร็จแล้ว':'ย้อนกลับ',()=>updateStatus(record),record.status==='ใหม่'?'complete':'revert'));
         if(state.role==='owner')area.append(makeAction('ลบ',()=>deleteRecord(record),'danger'));
-        actions.append(area);tr.append(name,date,status,actions);body.append(tr);
+        actions.append(area);tr.append(checkCell,name,date,status,actions);body.append(tr);
       });
-      renderPageButtons();
+      updateBulkToolbar();renderPageButtons();
     }
+    function updateBulkToolbar(){
+      const owner=state.role==='owner';$('bulkToolbar').classList.toggle('hide',!owner);
+      $('selectHeader').textContent=owner?'เลือก':'';
+      const n=state.selectedAll?state.matchingCount:state.selection.size;
+      $('bulkSelectedCount').textContent=state.selectedAll?'เลือกทั้งหมด '+n+' รายการ':'เลือกแล้ว '+n+' รายการ';
+      $('bulkDeleteSelected').disabled=state.adminBusy||state.loading||!n;
+      $('bulkDeleteAll').disabled=state.adminBusy||state.loading||!(Number($('totalCount').textContent)||0);
+      $('selectAllResults').disabled=state.adminBusy||state.loading||!state.matchingCount;
+      $('clearSelection').disabled=state.adminBusy||state.loading||!n;
+      $('selectAllResults').textContent=state.selectedAll?'เลือกทั้งหมดแล้ว':'เลือกทั้งหมดที่ตรงกับการค้นหา';
+    }
+    $('selectAllResults').addEventListener('click',()=>{
+      if(state.role!=='owner'||state.adminBusy)return;
+      state.selectedAll=true;state.selection.clear();renderRecords();
+    });
+    $('clearSelection').addEventListener('click',()=>{
+      state.selectedAll=false;state.selection.clear();renderRecords();
+    });
+    async function performBulkDelete(mode){
+      if(state.role!=='owner'||!state.token||state.adminBusy||state.loading)return;
+      const count=mode==='all'?Number($('totalCount').textContent):state.selectedAll?state.matchingCount:state.selection.size;
+      if(!count)return;
+      const scope=mode==='all'?'ข้อมูลทั้งหมดในระบบ':state.selectedAll?'ทุกรายการที่ตรงกับการค้นหา':'รายการที่เลือก';
+      if(!confirm('คุณกำลังจะลบ '+scope+' จำนวน '+count+' รายการ พร้อมย้ายรูปภาพไปถังขยะ Google Drive\n\nดำเนินการต่อหรือไม่?'))return;
+      const typed=prompt('เพื่อยืนยันการลบ '+count+' รายการ โปรดพิมพ์คำว่า ลบ เพื่อดำเนินการ');
+      if(typed!=='ลบ')return;
+      const token=state.token;
+      state.adminBusy=true;
+      let deleted=0,failed=0,problem='';
+      showWait('กำลังลบข้อมูลจำนวนมาก','กรุณารอจนกว่าระบบจะทำงานเสร็จ');
+      try{
+        if(mode==='all'||state.selectedAll){
+          // Fetch each first-page batch; never rely on visible rows alone.
+          const query=mode==='all'?'':state.search;
+          let passes=0;
+          while(passes++<10000){
+            const list=await run('adminList',token,1,query);
+            if(!list.items.length)break;
+            let batchDeleted=0;
+            for(const item of list.items){
+              $('waitDescription').textContent='ลบแล้ว '+deleted+' จากประมาณ '+count+' รายการ';
+              try{await run('adminDelete',token,item.id);deleted++;batchDeleted++;}
+              catch(e){failed++;problem=String(e.message||e);break;}
+            }
+            if(problem||!batchDeleted)break;
+          }
+        }else{
+          const ids=[...state.selection];
+          for(const id of ids){
+            $('waitDescription').textContent='ลบแล้ว '+deleted+' จาก '+ids.length+' รายการ';
+            try{await run('adminDelete',token,id);deleted++;state.selection.delete(id);}
+            catch(e){failed++;problem=String(e.message||e);break;}
+          }
+        }
+      }catch(e){problem=sessionCheck(e);failed++;}
+      finally{
+        state.adminBusy=false;state.selectedAll=false;hideWait();
+        await refreshRecords();
+      }
+      const report='ลบสำเร็จ '+deleted+' รายการ'+(problem?'\nการดำเนินการหยุดก่อนครบทุกรายการ: '+problem:'')+'\nรูปภาพถูกย้ายไปถังขยะ Google Drive';
+      alert(report);
+    }
+    $('bulkDeleteSelected').addEventListener('click',()=>performBulkDelete('selected'));
+    $('bulkDeleteAll').addEventListener('click',()=>performBulkDelete('all'));
     $('prevPage').addEventListener('click',()=>{if(state.page>1&&!state.loading&&!state.adminBusy){state.page--;refreshRecords();}});
     $('nextPage').addEventListener('click',()=>{if(state.page<state.pages&&!state.loading&&!state.adminBusy){state.page++;refreshRecords();}});
     $('searchInput').addEventListener('input',e=>{
       clearTimeout(searchTimeout);searchTimeout=setTimeout(()=>{
-        state.search=$('searchInput').value.trim();state.page=1;refreshRecords();
+        state.search=$('searchInput').value.trim();state.page=1;state.selection.clear();state.selectedAll=false;refreshRecords();
       },320);
     });
     async function mutateRecord(action,record,actionLabel,status){
@@ -540,7 +588,7 @@
       state.adminBusy=true;showWait(actionLabel,'กำลังอัปเดตข้อมูลใน Google Sheets / Google Drive');
       try{
         if(action==='update')await run('adminUpdateStatus',state.token,record.id,status);
-        else await run('adminDelete',state.token,record.id);
+        else {await run('adminDelete',state.token,record.id);state.selection.delete(record.id);}
         // Re-fetch after server confirms the update; never show false completion.
         state.listPending=false;
       }catch(e){alert(sessionCheck(e));}
