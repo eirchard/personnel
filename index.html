@@ -252,7 +252,7 @@
   <div class="wait-overlay hide" id="waitOverlay" role="status" aria-live="polite" aria-busy="true">
     <div class="wait-card"><div class="wait-spinner" aria-hidden="true"></div><h3 id="waitTitle" class="wait-title">กำลังดำเนินการ…</h3><p id="waitDescription" class="wait-desc">กรุณารอสักครู่</p><span class="wait-hint">กรุณาอย่าปิดหน้านี้ระหว่างดำเนินการ</span></div>
   </div>
-  <script src="./config.js"></script>
+  <script src="./config.js?v=20261020-1"></script>
   <script>
     'use strict';
     const $ = id => document.getElementById(id);
@@ -264,7 +264,7 @@
     let searchTimeout = null;
     // GitHub Pages calls Cloudflare Worker over HTTPS; Apps Script remains the private backend.
     // apiBaseUrl is public configuration, never a password or access token.
-    const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || '').trim();
+    const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || 'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api').trim();
     const API_METHODS = new Set([
       'getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile',
       'adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser',
