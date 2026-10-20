@@ -192,7 +192,7 @@
 
   <main id="adminPage" class="hide"><div class="shell admin-area">
     <div class="admin-head"><div><h1>จัดการรูปภาพบุคลากร</h1><p class="hint">พื้นที่สำหรับเจ้าหน้าที่ผู้ดูแลเว็บไซต์วิทยาลัย</p></div><button type="button" class="ghost-btn hide" id="logoutButton">ออกจากระบบ</button></div>
-    <section class="card admin-login" id="adminLoginPanel"><span class="section-flag"><span class="square"></span> ผู้ดูแลระบบ</span><h2>เข้าสู่ระบบจัดการข้อมูล</h2><p class="hint">กรอกชื่อบัญชีและรหัสผ่านทุกครั้งเพื่อเข้าสู่ระบบ · ผู้ดูแลหลักใช้ชื่อบัญชี <strong>admin</strong></p>
+    <section class="card admin-login" id="adminLoginPanel"><span class="section-flag"><span class="square"></span> ผู้ดูแลระบบ</span><h2>เข้าสู่ระบบจัดการข้อมูล</h2><p class="hint">กรอกชื่อบัญชีและรหัสผ่านเพื่อเข้าสู่ระบบ · เมื่อรีเฟรชในแท็บเดิมจะคงสถานะหากเซสชันยังไม่หมดอายุ · ผู้ดูแลหลักใช้ชื่อบัญชี <strong>admin</strong></p>
       <form id="loginForm"><div class="field"><label class="field-label" for="adminUsername">ชื่อบัญชี (Username) <span class="required">*</span></label><input class="name-input" id="adminUsername" name="username" type="text" placeholder="admin หรือชื่อบัญชีที่ได้รับ" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required></div><div class="field"><label class="field-label" for="adminPassword">รหัสผ่าน (Password) <span class="required">*</span></label><input class="name-input" type="password" id="adminPassword" name="password" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password"></div><div class="notice error hide" id="loginNotice" role="alert"></div><button class="submit-btn" id="loginButton" type="submit">เข้าสู่ระบบ</button></form>
     </section>
     <section id="adminDashboard" class="hide">
@@ -268,6 +268,21 @@
       adminBusy:false, modalRequest:0, listPending:false, listLoaded:false,role:'',username:'',displayName:'',currentPhotoId:'',previewCache:new Map()
     };
     let searchTimeout = null;
+    // Persist only the temporary auth token within this browser tab (never the password).
+    // The server validates it again on every reload; the backend still controls expiry and role.
+    const ADMIN_SESSION_KEY = 'personnel.admin.session.v1';
+    const LAST_VIEW_KEY = 'personnel.last.view.v1';
+    function getSavedAdminToken(){
+      try{
+        const value=JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY)||'null');
+        return value && typeof value.token==='string' && /^[0-9a-f-]{72}$/i.test(value.token) ? value.token : '';
+      }catch(_){return '';}
+    }
+    function saveAdminToken(token){try{sessionStorage.setItem(ADMIN_SESSION_KEY,JSON.stringify({token}));}catch(_){}}
+    function removeSavedAdminToken(){try{sessionStorage.removeItem(ADMIN_SESSION_KEY);}catch(_){}}
+    function rememberView(view){try{sessionStorage.setItem(LAST_VIEW_KEY,view);}catch(_){}}
+    function rememberedView(){try{return sessionStorage.getItem(LAST_VIEW_KEY)||'public';}catch(_){return 'public';}}
+
     const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || 'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api').trim();
     const API_METHODS = new Set(['getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile','adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser','adminDeleteUser','adminList','adminGetImage','adminStorePreview','adminDownloadImage','adminUpdateStatus','adminDelete']);
     async function run(method,...args){
@@ -303,6 +318,7 @@
         $('submitButton').disabled=!state.ready||state.photoProcessing;
         if(!state.ready)notice($('formNotice'),'ผู้ดูแลระบบยังไม่ได้ตั้งค่า กรุณาเรียกใช้งาน setup() ก่อน');
       }catch(e){$('systemLabel').textContent='ไม่สามารถเชื่อมต่อได้';notice($('formNotice'),errorText(e));}
+      await restoreAdminSession();
     }
     function resetPhoto(){
       ++latestPhotoRequest;state.photoProcessing=false;state.imageData='';state.previewData='';state.imageName='';
@@ -409,9 +425,36 @@
       $('successContent').classList.add('hide');clearNotice($('formNotice'));$('fullName').focus();
     });
 
-    // Admin credentials intentionally held only in page memory.
-    function openPublic(){$('adminPage').classList.add('hide');$('publicPage').classList.remove('hide');$('adminSwitchText').textContent='สำหรับผู้ดูแล';window.scrollTo(0,0);}
-    function openAdmin(){$('publicPage').classList.add('hide');$('adminPage').classList.remove('hide');$('adminSwitchText').textContent='กลับหน้าแบบฟอร์ม';window.scrollTo(0,0);if(state.token)refreshRecords();}
+    // Preserve the active page and restore validated admin sessions on refresh.
+    function applyAdminProfile(profile, token){
+      state.token=token;state.role=profile.role;state.username=profile.username;
+      state.displayName=profile.displayName;
+      $('currentAccount').textContent=profile.displayName+' · '+roleLabel(profile.role)+' ('+profile.username+')';
+      $('ownerManagement').classList.toggle('hide',profile.role!=='owner');
+      $('settingsTabUsers').classList.toggle('hide',profile.role!=='owner');
+      $('adminLoginPanel').classList.add('hide');$('adminDashboard').classList.remove('hide');
+      $('logoutButton').classList.remove('hide');
+      saveAdminToken(token);
+    }
+    async function restoreAdminSession(){
+      const savedToken=getSavedAdminToken();
+      if(rememberedView()==='admin')openAdmin();
+      if(!savedToken)return;
+      try{
+        if(rememberedView()==='admin')adminMessage('กำลังตรวจสอบเซสชันเดิม…',true);
+        const profile=await run('adminProfile',savedToken);
+        if(!profile || !['owner','editor','viewer'].includes(profile.role))throw new Error('สถานะบัญชีไม่ถูกต้อง');
+        applyAdminProfile(profile,savedToken);
+        if(rememberedView()==='admin')await refreshRecords();
+      }catch(e){
+        const message=errorText(e);
+        if(/เซสชันหมดอายุ|กรุณาเข้าสู่ระบบผู้ดูแล|สถานะบัญชีไม่ถูกต้อง/.test(message))removeSavedAdminToken();
+        // Do not expose the dashboard if the server cannot validate the session.
+        if(rememberedView()==='admin')notice($('loginNotice'),'ไม่สามารถคืนสถานะผู้ดูแล: '+message);
+      }
+    }
+    function openPublic(){rememberView('public');$('adminPage').classList.add('hide');$('publicPage').classList.remove('hide');$('adminSwitchText').textContent='สำหรับผู้ดูแล';window.scrollTo(0,0);}
+    function openAdmin(){rememberView('admin');$('publicPage').classList.add('hide');$('adminPage').classList.remove('hide');$('adminSwitchText').textContent='กลับหน้าแบบฟอร์ม';window.scrollTo(0,0);if(state.token)refreshRecords();}
     $('adminSwitch').addEventListener('click',()=>{$('adminPage').classList.contains('hide')?openAdmin():openPublic();});
     $('loginForm').addEventListener('submit',async e=>{
       e.preventDefault();clearNotice($('loginNotice'));const password=$('adminPassword').value;const username=$('adminUsername').value.trim();
@@ -421,12 +464,9 @@
       state.adminBusy=true;$('loginButton').disabled=true;$('loginButton').replaceChildren(...spinText(' กำลังตรวจสอบ…'));
       showWait('กำลังเข้าสู่ระบบ','กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ');
       try{
-        const response=await run('adminLogin',username,password);state.token=response.token;
-        state.role=response.role;state.username=response.username;state.displayName=response.displayName;
-        $('currentAccount').textContent=response.displayName+' · '+roleLabel(response.role)+' ('+response.username+')';
-        $('ownerManagement').classList.toggle('hide',response.role!=='owner');
-        $('adminPassword').value='';$('adminUsername').value='';$('adminLoginPanel').classList.add('hide');
-        $('adminDashboard').classList.remove('hide');$('logoutButton').classList.remove('hide');
+        const response=await run('adminLogin',username,password);
+        applyAdminProfile(response,response.token);
+        $('adminPassword').value='';$('adminUsername').value='';
       }catch(err){notice($('loginNotice'),errorText(err));}
       finally{
         state.adminBusy=false;$('loginButton').disabled=false;$('loginButton').textContent='เข้าสู่ระบบ';hideWait();
@@ -434,6 +474,7 @@
       if(state.token)refreshRecords();
     });
     function forceLogout(){
+      removeSavedAdminToken();
       state.token='';state.role='';state.username='';state.displayName='';state.records=[];state.selection.clear();state.selectedAll=false;state.matchingCount=0;state.listPending=false;state.listLoaded=false;state.previewCache.clear();
       closeResetPassword();state.adminBusy=false;closeSettings();$('changePasswordForm').reset();$('createUserForm').reset();
       $('adminLoginPanel').classList.remove('hide');$('adminDashboard').classList.add('hide');
