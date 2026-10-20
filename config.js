@@ -1,2 +1,4 @@
-/* Public endpoint only: paste Cloudflare Worker URL ending in /api. Never place passwords here. */
-window.PERSONNEL_CONFIG = Object.freeze({ apiBaseUrl: '' });
+/* Public API endpoint only; do not put usernames, passwords, or secrets in this file. */
+window.PERSONNEL_CONFIG = Object.freeze({
+  apiBaseUrl: 'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api'
+});
