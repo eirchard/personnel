@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <!-- Source hosted on GitHub; rendered by Apps Script to retain google.script.run. -->
+  <!-- GitHub Pages frontend. Backend API runs via HTTPS Cloudflare Worker -> Google Apps Script. -->
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -252,6 +252,7 @@
   <div class="wait-overlay hide" id="waitOverlay" role="status" aria-live="polite" aria-busy="true">
     <div class="wait-card"><div class="wait-spinner" aria-hidden="true"></div><h3 id="waitTitle" class="wait-title">กำลังดำเนินการ…</h3><p id="waitDescription" class="wait-desc">กรุณารอสักครู่</p><span class="wait-hint">กรุณาอย่าปิดหน้านี้ระหว่างดำเนินการ</span></div>
   </div>
+  <script src="./config.js"></script>
   <script>
     'use strict';
     const $ = id => document.getElementById(id);
@@ -261,13 +262,49 @@
       adminBusy:false, modalRequest:0, listPending:false, listLoaded:false,role:'',username:'',displayName:'',currentPhotoId:'',previewCache:new Map()
     };
     let searchTimeout = null;
-    const run = (method, ...args) => new Promise((resolve,reject) => {
-      if (!(window.google && google.script && google.script.run)) {
-        reject(new Error('ต้องเปิดหน้าเว็บผ่าน URL ที่ Deploy จาก Google Apps Script'));return;
+    // GitHub Pages calls Cloudflare Worker over HTTPS; Apps Script remains the private backend.
+    // apiBaseUrl is public configuration, never a password or access token.
+    const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || '').trim();
+    const API_METHODS = new Set([
+      'getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile',
+      'adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser',
+      'adminDeleteUser','adminList','adminGetImage','adminStorePreview',
+      'adminDownloadImage','adminUpdateStatus','adminDelete'
+    ]);
+    function validatedEndpoint(){
+      if(!apiEndpoint || apiEndpoint.includes('YOUR_WORKER')) {
+        throw new Error('ยังไม่ได้เชื่อมต่อ API กรุณาให้ผู้ดูแลตั้งค่า URL ของ Cloudflare Worker ในไฟล์ config.js');
       }
-      google.script.run.withSuccessHandler(resolve)
-        .withFailureHandler(error => reject(new Error(error?.message || 'ไม่สามารถติดต่อระบบได้')))[method](...args);
-    });
+      let url;
+      try { url = new URL(apiEndpoint); } catch(e) { throw new Error('URL ของ API ไม่ถูกต้อง'); }
+      if(url.protocol !== 'https:' || url.username || url.password || url.hash || url.search || url.pathname !== '/api'){
+        throw new Error('URL ของ API ต้องเป็น HTTPS และลงท้ายด้วย /api');
+      }
+      return url.href;
+    }
+    async function run(method,...args){
+      if(!API_METHODS.has(method)) throw new Error('คำสั่งไม่รองรับ');
+      const url=validatedEndpoint();
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),method==='saveSubmission'||method==='adminDownloadImage'?115000:65000);
+      try{
+        const response=await fetch(url,{
+          method:'POST',mode:'cors',cache:'no-store',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({method,args}),signal:controller.signal
+        });
+        let result;
+        try {result=await response.json();}catch(_){throw new Error('API ตอบกลับไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า Worker และ Apps Script');}
+        if(!response.ok||!result||!result.ok){
+          throw new Error(String(result?.error||'ไม่สามารถติดต่อระบบได้'));
+        }
+        return result.data;
+      }catch(error){
+        if(error?.name==='AbortError')throw new Error('การเชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่');
+        if(error instanceof TypeError)throw new Error('เชื่อมต่อ API ไม่สำเร็จ กรุณาตรวจสอบ URL Worker และอินเทอร์เน็ต');
+        throw error;
+      }finally{clearTimeout(timeout);}
+    }
     const errorText = e => (e && e.message) ? e.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่';
     function notice(element,message,type='error'){element.textContent=message;element.className='notice '+type;}
     function clearNotice(element){element.textContent='';element.className='notice hide';}
