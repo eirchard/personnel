@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <!-- Source hosted on GitHub; rendered by Apps Script to retain google.script.run. -->
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e5a42">
+  <title>ระบบรับรูปภาพบุคลากร</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--forest:#0e5a42;--deep:#0b3f32;--mint:#eaf5ef;--teal:#23896b;--line:#e2e9e4;--text:#20312a;--muted:#6c7a73;--white:#fff;--red:#c43838;--shadow:0 20px 60px rgba(17,68,49,.09);color-scheme:light}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f7f9f7;color:var(--text);font-family:'IBM Plex Sans Thai','Prompt',sans-serif;font-size:15px;line-height:1.6}
+    button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+    .shell{width:min(1160px,calc(100% - 48px));margin:0 auto}
+    .topbar{height:90px;border-bottom:1px solid #eaf0eb;background:rgba(255,255,255,.92)}.topbar .shell{height:100%;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:13px}.brand-mark{width:48px;height:48px;border-radius:15px;background:var(--forest);display:grid;place-items:center;color:white;box-shadow:0 8px 18px rgba(14,90,66,.2)}
+    .brand-head{font-family:'Prompt',sans-serif;font-size:17px;font-weight:600;letter-spacing:-.35px;line-height:1.4}.brand-sub{font-size:11px;letter-spacing:1.2px;font-weight:600;color:#87958d}
+    .top-actions{display:flex;align-items:center;gap:12px}.online-pill{display:inline-flex;align-items:center;gap:8px;color:#32664e;background:#edf7f0;border:1px solid #dcefe3;border-radius:25px;padding:7px 12px;font-size:12px;font-weight:600}.dot{width:7px;height:7px;border-radius:50%;background:#4ebc75}.dot.off{background:#d9934c}
+    .ghost-btn{border:1px solid #dde7e0;border-radius:12px;background:#fff;color:#53685a;padding:9px 14px;font-size:13px;font-weight:600;display:inline-flex;gap:8px;align-items:center;transition:.2s}.ghost-btn:hover{border-color:#8cba9f;background:#f6fcf8;color:var(--forest)}
+    .hero{position:relative;overflow:hidden;background:linear-gradient(116deg,#0c4938 0%,#136e51 66%,#298565 100%);color:white}.hero:after{content:'';position:absolute;right:-80px;top:-195px;width:610px;height:610px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 94px rgba(255,255,255,.025),0 0 0 191px rgba(255,255,255,.025);pointer-events:none}
+    .hero .shell{position:relative;z-index:1;padding:60px 0 86px}.eyebrow{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);color:#d9f6e7;border:1px solid rgba(255,255,255,.15);border-radius:100px;font-size:12px;font-weight:600;letter-spacing:.4px;padding:7px 12px}.hero h1{font-family:'Prompt',sans-serif;margin:17px 0 12px;font-size:clamp(30px,3.5vw,44px);line-height:1.35;letter-spacing:-.6px;font-weight:600}.hero p{font-size:15px;line-height:1.9;color:#d3ece0;margin:0;max-width:690px}
+    .content-grid{display:grid;grid-template-columns:minmax(0,1.36fr) minmax(280px,.78fr);gap:26px;align-items:start;margin-top:-45px;position:relative;z-index:2;padding-bottom:70px}
+    .card{background:#fff;border:1px solid #e9eee9;border-radius:21px;box-shadow:var(--shadow)}.form-card{padding:35px 38px 38px}.side-card{padding:30px}
+    .section-flag{display:inline-flex;align-items:center;gap:8px;color:#16815c;font-size:12px;font-weight:700;letter-spacing:.4px}.square{width:7px;height:7px;background:#1c9e69;border-radius:2px}
+    .card h2{font-family:'Prompt',sans-serif;line-height:1.45;font-size:23px;font-weight:600;letter-spacing:-.5px;margin:11px 0 5px}.hint{color:var(--muted);font-size:13px;margin:0}.rule{border:0;border-top:1px solid #edf1ed;margin:26px 0 24px}
+    .field{margin-bottom:25px}.field-label{display:block;color:#243b2c;font-weight:600;font-size:14px;margin-bottom:10px}.required{color:#d84545;margin-left:3px}
+    .name-input{width:100%;border:1.5px solid #dce8df;background:#fff;padding:14px 16px;height:53px;border-radius:11px;outline:none;transition:.18s;color:#21362b}.name-input::placeholder{color:#adb9b1}.name-input:focus{border-color:#1a9162;box-shadow:0 0 0 3px rgba(34,154,103,.09)}
+    .upload-zone{display:block;position:relative;border:1.5px dashed #b6d5c4;border-radius:15px;background:linear-gradient(180deg,#fbfefc,#f4faf6);padding:29px 18px;text-align:center;transition:.18s;cursor:pointer}.upload-zone:hover,.upload-zone.drag{border-color:#1a9567;background:#edf9f1}.upload-icon{margin:0 auto 10px;width:48px;height:48px;border-radius:14px;background:white;color:var(--forest);border:1px solid #e1ede5;display:grid;place-items:center}
+    .upload-title{font-weight:700;font-size:14px;margin-bottom:2px}.upload-desc{color:#809188;font-size:12px}.choose{display:inline-block;margin-top:14px;border:1px solid #c8e4d3;color:#126246;background:white;border-radius:9px;padding:6px 15px;font-size:12px;font-weight:700}
+    .file-info{display:none;margin-top:9px;background:#eff8f1;border-radius:9px;padding:9px 12px;font-size:12px;color:#25684b;font-weight:600;overflow-wrap:anywhere}.file-info.visible{display:block}
+    .agreement{border-radius:10px;padding:12px 13px;background:#f7f9f7;color:#708077;font-size:12px;line-height:1.8;display:flex;align-items:flex-start;gap:8px}.agreement svg{flex-shrink:0;color:#4e8e69;margin-top:2px}
+    .submit-btn{width:100%;height:54px;background:#0c694b;color:white;border:1px solid #0c694b;border-radius:12px;font-weight:700;margin-top:23px;display:flex;align-items:center;justify-content:center;gap:10px;transition:.2s;box-shadow:0 9px 18px rgba(10,102,71,.14)}.submit-btn:hover:not(:disabled){transform:translateY(-1px);background:#09573f}.submit-btn:active{transform:translateY(0)}
+    .side-head{font-family:'Prompt',sans-serif;font-size:17px;font-weight:600;margin:0 0 6px}.side-caption{color:var(--muted);font-size:12px;margin:0 0 21px}
+    .photo-frame{background:#eef3ee;border:8px solid #f6f8f5;box-shadow:inset 0 0 0 1px #e1e9e2;border-radius:16px;aspect-ratio:4/4.3;max-height:340px;width:100%;overflow:hidden;position:relative;display:grid;place-items:center}
+    .photo-frame:before{content:'';position:absolute;inset:0;background:linear-gradient(145deg,#e3ede5,#f1f5ed);z-index:0}.silhouette{position:relative;z-index:1;color:#a9bcb0;width:120px;height:120px}.photo-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:2;background:#f0f4f0;display:none}.photo-frame img.visible{display:block}
+    .photo-placeholder{position:absolute;z-index:1;bottom:29px;color:#93a59a;font-size:12px}.preview-caption{display:flex;align-items:center;gap:7px;color:#769080;font-size:12px;font-weight:600;margin-top:14px}
+    .tips{margin:24px 0 0;padding:20px 0 0;border-top:1px solid #ecf1ec}.tip{display:flex;gap:11px;margin-bottom:16px;align-items:flex-start}.tip:last-child{margin-bottom:0}.tip-badge{width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;background:#eaf7ee;border-radius:8px;color:#0e744f;font-size:12px;font-weight:700}.tip p{margin:0;font-size:12px;line-height:1.8;color:#63766a}
+    .footer{border-top:1px solid #e6ede7;background:#fff;color:#8b998f;text-align:center;padding:21px 16px;font-size:12px}
+    .hide{display:none!important}.notice{margin:15px 0 0;font-size:13px;line-height:1.7;padding:12px;border-radius:10px}.notice.error{color:#9c3434;background:#fff1f1}.notice.success{color:#116949;background:#eaf8ef}.spinner{width:17px;height:17px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    .done-panel{text-align:center;padding:33px 0 5px}.done-icon{width:76px;height:76px;margin:0 auto 22px;border-radius:23px;color:#0c8e5b;background:#e8f8ed;display:grid;place-items:center}.done-panel h2{margin:0 0 9px}.done-panel p{color:var(--muted);line-height:1.8;font-size:14px;margin:0 0 22px}.done-reference{font-size:12px;color:#73917e;margin-bottom:25px}.outline-btn{padding:11px 20px;background:#fff;border:1px solid #bcdcca;color:#166c4e;border-radius:10px;font-weight:700}
+    /* Administration section */
+    .admin-area{padding:36px 0 80px}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:23px}.admin-head h1{font:600 27px/1.3 'Prompt',sans-serif;margin:0}.admin-login{max-width:480px;margin:37px auto;padding:35px}.admin-login .field{margin:24px 0 0}.admin-login .submit-btn{margin-top:19px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:21px}.stat{border-radius:16px;padding:19px 21px;background:#fff;border:1px solid #e6eee8}.stat-label{font-size:12px;color:#77877b}.stat-value{font:600 30px/1.4 'Prompt',sans-serif;margin-top:4px;color:#184d39}.stat:nth-child(2) .stat-value{color:#b1812e}
+    .record-card{padding:23px}.record-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}.record-tools h2{font:600 17px 'Prompt',sans-serif;margin:0}.search{height:43px;width:270px;max-width:100%;border:1px solid #e0e9e2;border-radius:10px;padding:10px 12px;outline:none}.search:focus{border-color:#47a57d}
+    .table-scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:650px;text-align:left}th{font-size:12px;color:#819088;font-weight:600;background:#f7faf7;padding:13px 14px}td{padding:15px 14px;border-top:1px solid #eff2f0;font-size:13px;vertical-align:middle}.name-cell{font-weight:600;color:#283a30}.status-badge{font-size:11px;font-weight:700;white-space:nowrap;border-radius:100px;padding:5px 10px}.status-badge.new{background:#fdf4dd;color:#94661c}.status-badge.finished{background:#e8f7ed;color:#217c51}.table-actions{display:flex;gap:7px}.sm-btn{border:1px solid #dce8df;background:#fff;color:#267052;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;white-space:nowrap}.sm-btn:hover{background:#eef8f1}.sm-btn.danger{color:#b54545;border-color:#f2d8d8}.sm-btn.danger:hover{background:#fff1f1}
+    .paging{display:flex;justify-content:flex-end;gap:9px;align-items:center;margin-top:17px;color:#7b8d80;font-size:12px}.paging .sm-btn{min-width:74px}.empty-state{text-align:center;padding:50px 16px;color:#8a9990;font-size:13px}.admin-message{font-size:12px;color:#788b7b;margin:6px 0 20px}
+    .overlay{position:fixed;inset:0;z-index:10;background:rgba(5,28,18,.62);display:flex;justify-content:center;align-items:center;padding:18px}.modal{max-width:580px;width:100%;background:#fff;border-radius:18px;padding:23px;max-height:94vh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px;gap:10px}.modal-head h3{font:600 17px 'Prompt',sans-serif;margin:0}.modal img{width:100%;max-height:67vh;object-fit:contain;background:#f4f7f4;border-radius:11px}.icon-btn{width:36px;height:36px;border:1px solid #e1e9e3;border-radius:10px;background:#fff;font-size:22px;line-height:1}
+    @media(max-width:900px){.content-grid{grid-template-columns:minmax(0,1fr) 310px;gap:18px}.form-card{padding:28px}.side-card{padding:22px}.photo-frame{max-height:310px}.hero .shell{padding-bottom:80px}}
+    @media(max-width:700px){.shell{width:min(100% - 28px,1160px)}.topbar{height:76px}.brand-mark{height:43px;width:43px}.brand-head{font-size:14px}.brand-sub{font-size:10px}.online-pill{display:none}.top-actions .ghost-btn{padding:8px 10px;font-size:12px}.top-actions .ghost-btn svg{display:none}.hero .shell{padding:42px 0 75px}.hero h1{font-size:30px;margin-top:14px}.hero p{font-size:13px}.content-grid{grid-template-columns:1fr;margin-top:-35px;gap:18px;padding-bottom:45px}.form-card,.side-card{padding:24px}.card h2{font-size:21px}.photo-frame{max-height:280px;aspect-ratio:4/3}.side-card{display:block}.stats{gap:8px}.stat{padding:13px}.stat-value{font-size:24px}.record-card{padding:15px}.record-tools{align-items:stretch;flex-direction:column}.search{width:100%}.admin-head h1{font-size:22px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+    /* V1.1: distinct purposeful actions, always-visible waiting feedback */
+    .sm-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:35px;padding:7px 12px;border-radius:9px;border:1px solid transparent;font-weight:700;transition:background .17s,border-color .17s,transform .17s;box-shadow:none}
+    .sm-btn svg{width:15px;height:15px;flex-shrink:0;stroke-width:2.1}
+    .sm-btn.view{background:#e8f2ff;border-color:#c8defc;color:#155aaa}
+    .sm-btn.view:hover:not(:disabled){background:#d4e8ff;border-color:#93c2fa}
+    .sm-btn.complete{background:#e5f7ec;border-color:#b8e6c8;color:#116c40}
+    .sm-btn.complete:hover:not(:disabled){background:#d1f1dd;border-color:#86d3a1}
+    .sm-btn.revert{background:#fff2dc;border-color:#f7d7a7;color:#9b5b13}
+    .sm-btn.revert:hover:not(:disabled){background:#ffe8c3;border-color:#f2c276}
+    .sm-btn.danger{background:#fff0f0;border-color:#f7cccc;color:#b82d36}
+    .sm-btn.danger:hover:not(:disabled){background:#ffe0e2;border-color:#efadb3}
+    .sm-btn.page-btn{background:#f5f7f8;color:#475569;border-color:#dfe5e9}
+    .sm-btn.page-btn:hover:not(:disabled){background:#e9eff2;border-color:#c8d5df}
+    .sm-btn:focus-visible,.icon-btn:focus-visible,.submit-btn:focus-visible,.outline-btn:focus-visible{outline:3px solid #63a8da;outline-offset:2px}
+    .sm-btn:disabled{opacity:.53}
+    .table-actions{gap:8px;flex-wrap:nowrap;min-width:max-content}
+    .admin-message{display:flex;align-items:center;gap:9px;min-height:22px}
+    .admin-message.is-busy{color:#0b6b56;font-weight:600}
+    .inline-spinner{display:inline-block;flex:0 0 auto;width:16px;height:16px;vertical-align:-3px;border:2px solid #b9ded0;border-top-color:#0d7d58;border-radius:50%;animation:spin .7s linear infinite}
+    .file-info.busy{background:#eaf6ff;color:#236aa5}
+    .file-info.busy .inline-spinner{border-color:#c5e2fb;border-top-color:#1473c1}
+    .preview-loading{position:absolute;z-index:3;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(245,250,247,.89);font-size:13px;color:#225e49;font-weight:700}
+    .preview-loading .inline-spinner{width:30px;height:30px;border-width:3px}
+    .wait-overlay{position:fixed;inset:0;z-index:50;background:rgba(13,38,28,.47);display:flex;align-items:center;justify-content:center;padding:22px;backdrop-filter:blur(3px)}
+    .wait-card{width:min(100%,380px);background:#fff;border:1px solid #e6efe9;border-radius:22px;padding:32px 28px;text-align:center;box-shadow:0 22px 75px rgba(4,41,30,.23)}
+    .wait-spinner{width:54px;height:54px;margin:0 auto 17px;border:5px solid #d9f0e3;border-top-color:#0a7852;border-radius:50%;animation:spin .75s linear infinite}
+    .wait-title{font:600 19px/1.5 'Prompt',sans-serif;margin:0 0 7px;color:#164d38}
+    .wait-desc{font-size:13px;color:#687f70;margin:0;line-height:1.8}
+    .wait-hint{display:inline-block;margin-top:17px;padding:6px 11px;background:#eef7f0;border-radius:100px;color:#2a7850;font-size:11px;font-weight:600}
+    .modal-loading{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:13px;min-height:195px;padding:22px;background:#f4f9f6;border:1px solid #e5efe8;border-radius:12px;text-align:center;color:#547867;font-size:13px;font-weight:600}
+    .modal-loading .inline-spinner{width:38px;height:38px;border-width:4px}
+    .modal-loading.error{background:#fff5f5;color:#a52637;border-color:#f9d6d6}
+    .modal-loading.error .inline-spinner{display:none}
+    .download-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:15px;background:#1b62b4;border:1px solid #1b62b4;color:white;border-radius:11px;padding:11px 15px;font-weight:700;transition:.2s}
+    .download-btn:hover{background:#15539c}
+    .download-btn svg{width:17px;height:17px}
+    .icon-btn:hover{background:#fff0f0;border-color:#f4caca;color:#b82d36}
+    .photo-frame{isolation:isolate}
+    /* v1.2 — profile and role-based controls */
+    .admin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:13px;margin:0 0 17px;flex-wrap:wrap}
+    .whoami{display:inline-flex;align-items:center;gap:8px;background:#edf6f0;padding:7px 12px;border:1px solid #d7e9db;border-radius:10px;color:#1f6048;font-size:12px;font-weight:600}
+    .settings-btn{padding:9px 14px;border:1px solid #bcd6ed;border-radius:10px;color:#155c9c;background:#e9f2fc;font-weight:700}
+    .settings-btn:hover{background:#d5e9ff}
+    .account-card{padding:25px;margin-bottom:20px}.account-card h2{font-size:19px;margin:0 0 10px}
+    .section-line{border:0;border-top:1px solid #e8eee9;margin:23px 0}
+    .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .settings-grid .field{margin-bottom:0}.settings-grid .full-row{grid-column:1/-1}
+    .settings-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .settings-actions button{min-height:40px}
+    .form-select{height:52px;width:100%;padding:10px 14px;border:1px solid #dce8df;background:white;color:#1d4633;border-radius:10px;font:inherit}
+    .users-table{min-width:650px}.users-table td{padding:12px}.users-table .table-actions{flex-wrap:wrap}
+    .settings-note{font-size:12px;color:#718476;margin:7px 0 19px}
+    @media(max-width:700px){.table-actions{gap:6px}.sm-btn{padding:7px 10px;font-size:12px}.wait-card{padding:27px 22px}.settings-grid{grid-template-columns:1fr}.account-card{padding:19px}.users-table .table-actions{flex-wrap:wrap}}
+
+
+    /* v1.3: separate settings dialog instead of an inline admin card */
+    body.modal-open{overflow:hidden}
+    .settings-overlay{z-index:24;align-items:center;overflow:auto;padding:22px;background:rgba(11,40,29,.61);backdrop-filter:blur(4px)}
+    .settings-dialog{width:min(900px,100%);max-height:min(91vh,920px);display:flex;flex-direction:column;border:1px solid #e7eee8;border-radius:21px;background:#fff;overflow:hidden;box-shadow:0 26px 95px rgba(4,28,18,.31)}
+    .settings-dialog-head{display:flex;align-items:center;gap:14px;padding:23px 26px 19px;border-bottom:1px solid #e9efea;background:linear-gradient(105deg,#f4faf5,#fff)}
+    .settings-heading-icon{width:48px;height:48px;display:grid;place-items:center;flex-shrink:0;background:#e4f3ea;border:1px solid #cbe7d5;border-radius:14px;color:#126747;font-size:23px}
+    .settings-dialog-title{flex:1;min-width:0}.settings-dialog-title h2{font:600 23px/1.4 'Prompt',sans-serif;margin:4px 0}.settings-dialog-title p{font-size:12px;color:#718379;margin:0;line-height:1.7}
+    .settings-close{flex-shrink:0;align-self:flex-start}
+    .settings-tabs{display:flex;gap:9px;padding:15px 26px 0;border-bottom:1px solid #e9efeb}
+    .settings-tab{border:1px solid transparent;background:transparent;border-radius:11px 11px 0 0;padding:11px 18px;color:#677d6f;font-weight:700;font-size:13px;transition:.15s}
+    .settings-tab.active{background:#e9f7ee;border-color:#cce6d4;border-bottom-color:#e9f7ee;color:#116142}
+    .settings-tab:hover:not(.active){background:#f3f7f4;color:#244936}
+    .settings-tab:focus-visible,.settings-close:focus-visible{outline:3px solid #63a8da;outline-offset:2px}
+    .settings-dialog-body{flex:1;min-height:0;overflow-y:auto;padding:24px 26px 29px;overscroll-behavior:contain}
+    .settings-dialog-body h2{font:600 19px/1.5 'Prompt',sans-serif;margin:0 0 9px}
+    .settings-dialog-body .settings-grid{max-width:100%}
+    .settings-dialog-foot{padding:12px 26px;border-top:1px solid #e8eeea;background:#fbfcfb;display:flex;justify-content:space-between;align-items:center;gap:15px}
+    .settings-dialog-foot span{font-size:11px;color:#829087}
+    .reset-overlay{z-index:32}.reset-dialog{max-width:440px;box-shadow:0 25px 85px rgba(5,36,24,.30)}.reset-dialog .field{margin-bottom:15px}
+    @media(max-width:700px){
+      .settings-overlay{padding:9px;align-items:center}.settings-dialog{max-height:calc(100dvh - 18px);border-radius:16px}
+      .settings-dialog-head{gap:10px;padding:17px}.settings-heading-icon{width:40px;height:40px;border-radius:12px;font-size:18px}.settings-dialog-title h2{font-size:17px}
+      .settings-dialog-title p{font-size:11px}.settings-tabs{padding:11px 13px 0;gap:4px}.settings-tab{font-size:11px;padding:10px 9px;flex:1}
+      .settings-dialog-body{padding:19px 17px}.settings-dialog-foot{padding:11px 17px}.settings-dialog-foot span{display:none}
+      .settings-dialog-body .users-table{min-width:600px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="shell">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V6l8-4 8 4v14"/><path d="M2 20h20M9 20v-6h6v6M8 8h.01M16 8h.01M8 11h.01M16 11h.01"/></svg></span><span><span class="brand-head">ระบบรับรูปภาพบุคลากร</span><br><span class="brand-sub">COLLEGE STAFF PHOTO PORTAL</span></span></div>
+    <div class="top-actions"><span class="online-pill"><span id="statusDot" class="dot off"></span><span id="systemLabel">ตรวจสอบระบบ</span></span><button class="ghost-btn" id="adminSwitch" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span id="adminSwitchText">สำหรับผู้ดูแล</span></button></div>
+  </div></header>
+
+  <main id="publicPage">
+    <section class="hero"><div class="shell">
+      <span class="eyebrow"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg> ปรับปรุงข้อมูลบุคลากร</span>
+      <h1>อัปเดตรูปภาพของคุณ<br>ให้พร้อมแสดงบนเว็บไซต์วิทยาลัย</h1>
+      <p>กรอกชื่อ–นามสกุล และอัปโหลดรูปภาพใหม่ของคุณได้ง่าย ๆ ในขั้นตอนเดียว<br class="desktop-break"> เพื่อให้เจ้าหน้าที่นำไปปรับปรุงข้อมูลบนเว็บไซต์วิทยาลัย</p>
+    </div></section>
+    <div class="shell content-grid">
+      <section class="card form-card" aria-label="แบบฟอร์มรับรูปภาพ">
+        <div id="formContent">
+          <div class="section-flag"><span class="square"></span> แบบฟอร์มส่งรูปภาพ</div>
+          <h2>ข้อมูลสำหรับอัปเดตรูปภาพ</h2>
+          <p class="hint">กรุณากรอกข้อมูลให้ครบทั้ง 2 รายการ</p>
+          <hr class="rule">
+          <form id="submissionForm" novalidate>
+            <div class="field"><label for="fullName" class="field-label">01 · ชื่อ–นามสกุล <span class="required">*</span></label><input id="fullName" name="fullName" class="name-input" type="text" placeholder="กรอกชื่อ–นามสกุลของคุณ" maxlength="120" autocomplete="name" required></div>
+            <div class="field"><label for="photoFile" class="field-label">02 · รูปภาพบุคลากร <span class="required">*</span></label>
+              <label for="photoFile" id="dropZone" class="upload-zone"><span class="upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span><div class="upload-title">คลิกเพื่อเลือกรูปภาพ หรือลากไฟล์มาวาง</div><div class="upload-desc">รองรับ JPG, PNG, WEBP · ไม่เกิน 15 MB</div><span class="choose">เลือกรูปภาพ</span></label>
+              <input type="file" id="photoFile" name="photoFile" accept="image/jpeg,image/png,image/webp" class="hide" required>
+              <div id="fileInfo" class="file-info" aria-live="polite"></div>
+            </div>
+            <div class="agreement"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>รูปภาพที่ส่งจะถูกจัดเก็บเพื่อให้เจ้าหน้าที่ตรวจสอบและนำไปปรับปรุงรูปภาพบุคลากรบนเว็บไซต์วิทยาลัยเท่านั้น</span></div>
+            <div id="formNotice" class="notice hide" role="alert"></div>
+            <button type="submit" id="submitButton" class="submit-btn" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16m-7-7 7 7-7 7"/></svg><span id="submitLabel">ส่งรูปภาพของฉัน</span></button>
+          </form>
+        </div>
+        <div id="successContent" class="done-panel hide" role="status">
+          <div class="done-icon"><svg width="43" height="43" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7 12 3.5 3.5L17 9"/></svg></div>
+          <h2>ส่งรูปภาพเรียบร้อยแล้ว</h2>
+          <p>ระบบบันทึกข้อมูลของคุณแล้ว<br>เจ้าหน้าที่จะตรวจสอบและดำเนินการปรับปรุงบนเว็บไซต์วิทยาลัย</p>
+          <div id="successReference" class="done-reference"></div>
+          <button type="button" class="outline-btn" id="newSubmission">ส่งรายการใหม่</button>
+        </div>
+      </section>
+      <aside class="card side-card">
+        <h3 class="side-head">ตัวอย่างรูปภาพของคุณ</h3>
+        <p class="side-caption">สามารถตรวจสอบรูปภาพก่อนกดส่ง</p>
+        <div class="photo-frame"><div id="photoPreparing" class="preview-loading hide" role="status"><span class="inline-spinner" aria-hidden="true"></span><span>กำลังเตรียมรูปภาพ…</span></div><svg class="silhouette" viewBox="0 0 120 120" fill="currentColor" aria-hidden="true"><circle cx="60" cy="40" r="24"/><path d="M13 110c2-27 18-39 47-39s45 12 47 39"/></svg><span class="photo-placeholder" id="photoPlaceholder">ยังไม่ได้เลือกรูปภาพ</span><img id="photoPreview" alt="ตัวอย่างรูปภาพที่เลือก"></div>
+        <div class="preview-caption"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg> ภาพที่แสดงเป็นตัวอย่างก่อนส่ง</div>
+        <div class="tips"><div class="tip"><span class="tip-badge">✓</span><p>แนะนำรูปถ่ายหน้าตรง เห็นใบหน้าชัดเจน</p></div><div class="tip"><span class="tip-badge">✓</span><p>แนะนำข้าราชการและพนักงานราชการสวมชุดปกติขาว</p></div><div class="tip"><span class="tip-badge">✓</span><p>บุคลากรอื่นแต่งกายสุภาพ และใช้พื้นหลังที่เรียบร้อย</p></div><div class="tip"><span class="tip-badge">✓</span><p>ระบบปรับขนาดรูปเพื่อให้อัปโหลดได้สะดวก โดยเก็บภาพในพื้นที่ส่วนตัวของวิทยาลัย</p></div></div>
+      </aside>
+    </div>
+  </main>
+
+  <main id="adminPage" class="hide"><div class="shell admin-area">
+    <div class="admin-head"><div><h1>จัดการรูปภาพบุคลากร</h1><p class="hint">พื้นที่สำหรับเจ้าหน้าที่ผู้ดูแลเว็บไซต์วิทยาลัย</p></div><button type="button" class="ghost-btn hide" id="logoutButton">ออกจากระบบ</button></div>
+    <section class="card admin-login" id="adminLoginPanel"><span class="section-flag"><span class="square"></span> ผู้ดูแลระบบ</span><h2>เข้าสู่ระบบจัดการข้อมูล</h2><p class="hint">กรอกชื่อบัญชีและรหัสผ่านทุกครั้งเพื่อเข้าสู่ระบบ · ผู้ดูแลหลักใช้ชื่อบัญชี <strong>admin</strong></p>
+      <form id="loginForm"><div class="field"><label class="field-label" for="adminUsername">ชื่อบัญชี (Username) <span class="required">*</span></label><input class="name-input" id="adminUsername" name="username" type="text" placeholder="admin หรือชื่อบัญชีที่ได้รับ" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32" required></div><div class="field"><label class="field-label" for="adminPassword">รหัสผ่าน (Password) <span class="required">*</span></label><input class="name-input" type="password" id="adminPassword" name="password" placeholder="กรอกรหัสผ่าน" required autocomplete="current-password"></div><div class="notice error hide" id="loginNotice" role="alert"></div><button class="submit-btn" id="loginButton" type="submit">เข้าสู่ระบบ</button></form>
+    </section>
+    <section id="adminDashboard" class="hide">
+      <div class="admin-toolbar"><span class="whoami" id="currentAccount">กำลังตรวจสอบบัญชี…</span><button type="button" class="settings-btn" id="settingsToggle">⚙ ตั้งค่าบัญชีและสิทธิ์</button></div>
+      <div class="stats"><div class="stat"><div class="stat-label">รายการทั้งหมด</div><div id="totalCount" class="stat-value">—</div></div><div class="stat"><div class="stat-label">รอดำเนินการ</div><div id="newCount" class="stat-value">—</div></div><div class="stat"><div class="stat-label">ดำเนินการแล้ว</div><div id="doneCount" class="stat-value">—</div></div></div>
+      <div class="card record-card"><div class="record-tools"><h2>รายการรูปภาพที่ได้รับ</h2><input id="searchInput" class="search" type="search" placeholder="ค้นหาชื่อ–นามสกุล…" aria-label="ค้นหาชื่อบุคลากร"></div><div id="adminNotice" class="admin-message" aria-live="polite">ข้อมูลรูปภาพเก็บไว้ใน Google Drive แบบส่วนตัว</div><div class="table-scroll"><table><thead><tr><th>ชื่อ–นามสกุล</th><th>วันที่ส่ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="recordsBody"><tr><td colspan="4" class="empty-state">กำลังโหลดข้อมูล…</td></tr></tbody></table></div><div class="paging"><button type="button" class="sm-btn page-btn" id="prevPage">ก่อนหน้า</button><span id="pageNumber">1 / 1</span><button type="button" class="sm-btn page-btn" id="nextPage">ถัดไป</button></div></div>
+    </section>
+  </div></main>
+  <footer class="footer">© ระบบรับรูปภาพบุคลากรสำหรับเว็บไซต์วิทยาลัย · พัฒนาสำหรับการจัดการข้อมูลภายในสถานศึกษา</footer>
+  <!-- Account settings is a separate popup; it never extends the admin dashboard. -->
+  <div class="overlay settings-overlay hide" id="settingsOverlay" role="dialog" aria-modal="true" aria-labelledby="settingsDialogTitle">
+    <section class="settings-dialog" id="accountPanel" aria-label="ตั้งค่าบัญชีและสิทธิ์">
+      <header class="settings-dialog-head">
+        <div class="settings-heading-icon" aria-hidden="true">⚙</div>
+        <div class="settings-dialog-title"><span class="section-flag">ศูนย์จัดการบัญชี</span><h2 id="settingsDialogTitle">ตั้งค่าบัญชีและสิทธิ์</h2><p>จัดการข้อมูลบัญชีในหน้าต่างเฉพาะ โดยไม่กระทบหน้ารายการรูปภาพ</p></div>
+        <button type="button" class="icon-btn settings-close" id="closeSettings" aria-label="ปิดการตั้งค่า">×</button>
+      </header>
+      <nav class="settings-tabs" aria-label="หัวข้อการตั้งค่า" role="tablist">
+        <button type="button" id="settingsTabPassword" class="settings-tab active" role="tab" aria-selected="true" aria-controls="passwordSettingsTab">🔐 เปลี่ยนรหัสผ่าน</button>
+        <button type="button" id="settingsTabUsers" class="settings-tab" role="tab" aria-selected="false" aria-controls="ownerManagement">👥 จัดการผู้ใช้และสิทธิ์</button>
+      </nav>
+      <div class="settings-dialog-body">
+        <div id="passwordSettingsTab" role="tabpanel" aria-labelledby="settingsTabPassword">
+
+        <h2>เปลี่ยนรหัสผ่านของฉัน</h2><p class="settings-note">รหัสผ่านใหม่อย่างน้อย 12 ตัวอักษร ต้องมีตัวอักษรและตัวเลข · หลังเปลี่ยนต้องเข้าสู่ระบบใหม่</p>
+        <form id="changePasswordForm"><div class="settings-grid">
+          <div class="field"><label class="field-label" for="currentPassword">รหัสผ่านปัจจุบัน</label><input type="password" id="currentPassword" class="name-input" autocomplete="current-password" required></div>
+          <div class="field"><label class="field-label" for="newPassword">รหัสผ่านใหม่</label><input type="password" id="newPassword" class="name-input" autocomplete="new-password" minlength="12" required></div>
+          <div class="field full-row"><label class="field-label" for="confirmPassword">ยืนยันรหัสผ่านใหม่</label><input type="password" id="confirmPassword" class="name-input" autocomplete="new-password" minlength="12" required></div>
+        </div><div class="settings-actions"><button type="submit" class="sm-btn complete" id="changePasswordButton">บันทึกรหัสผ่านใหม่</button></div></form>
+        <div class="notice hide" id="passwordNotice" role="alert"></div>
+        </div>
+        <div id="ownerManagement" class="hide" role="tabpanel" aria-labelledby="settingsTabUsers">
+<h2>ผู้ใช้งานและกำหนดสิทธิ์</h2>
+          <p class="settings-note">ผู้ดูแลหลักจัดการได้ทุกอย่าง · เจ้าหน้าที่แก้ไขดูรูปและเปลี่ยนสถานะได้ · ผู้ตรวจสอบดูและดาวน์โหลดรูปเท่านั้น</p>
+          <form id="createUserForm"><div class="settings-grid">
+            <div class="field"><label class="field-label" for="newUsername">ชื่อบัญชีภาษาอังกฤษ</label><input id="newUsername" class="name-input" autocomplete="off" placeholder="staff01" maxlength="32" required></div>
+            <div class="field"><label class="field-label" for="newDisplayName">ชื่อผู้ได้รับสิทธิ์</label><input id="newDisplayName" class="name-input" maxlength="100" placeholder="ชื่อ–นามสกุล" required></div>
+            <div class="field"><label class="field-label" for="newUserRole">ระดับสิทธิ์</label><select id="newUserRole" class="form-select"><option value="viewer">ผู้ตรวจสอบ (ดูรูป)</option><option value="editor">เจ้าหน้าที่ (เปลี่ยนสถานะ)</option></select></div>
+            <div class="field"><label class="field-label" for="newUserPassword">รหัสผ่านเริ่มต้น</label><input id="newUserPassword" type="password" class="name-input" autocomplete="new-password" minlength="12" placeholder="อย่างน้อย 12 ตัวอักษร" required></div>
+          </div><div class="settings-actions"><button type="submit" id="createUserButton" class="sm-btn complete">+ เพิ่มบัญชีผู้ใช้</button></div></form>
+          <div id="userNotice" class="notice hide" role="alert"></div>
+          <div class="table-scroll" style="margin-top:19px"><table class="users-table"><thead><tr><th>บัญชี</th><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="usersBody"><tr><td colspan="5" class="empty-state">ยังไม่ได้โหลดรายชื่อบัญชี</td></tr></tbody></table></div>
+        </div>
+      </div>
+      <footer class="settings-dialog-foot"><span>การเปลี่ยนแปลงสิทธิ์จะมีผลทันทีหลังบันทึก</span><button type="button" class="ghost-btn" id="settingsDone">ปิดหน้าต่าง</button></footer>
+    </section>
+  </div>
+  <!-- Password reset dialog: do not collect new passwords in an unmasked browser prompt. -->
+  <div class="overlay reset-overlay hide" id="resetPasswordOverlay" role="dialog" aria-modal="true" aria-labelledby="resetPasswordTitle">
+    <section class="modal reset-dialog">
+      <div class="modal-head"><h3 id="resetPasswordTitle">ตั้งรหัสผ่านใหม่</h3><button type="button" class="icon-btn" id="closeResetPassword" aria-label="ปิดหน้าต่างตั้งรหัสผ่าน">×</button></div>
+      <p class="settings-note" id="resetPasswordAccount">กำหนดรหัสผ่านเริ่มต้นสำหรับบัญชีผู้ใช้</p>
+      <form id="resetPasswordForm"><div class="field"><label class="field-label" for="resetPasswordInput">รหัสผ่านใหม่ <span class="required">*</span></label><input id="resetPasswordInput" type="password" class="name-input" autocomplete="new-password" minlength="12" maxlength="128" required></div>
+        <div class="field"><label class="field-label" for="resetPasswordConfirm">ยืนยันรหัสผ่านใหม่ <span class="required">*</span></label><input id="resetPasswordConfirm" type="password" class="name-input" autocomplete="new-password" minlength="12" maxlength="128" required></div>
+        <div class="notice error hide" id="resetPasswordNotice" role="alert"></div>
+        <div class="settings-actions"><button type="button" class="ghost-btn" id="cancelResetPassword">ยกเลิก</button><button type="submit" class="sm-btn complete">บันทึกรหัสผ่านใหม่</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="overlay hide" id="imageOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-head"><h3 id="modalTitle">ตัวอย่างรูปภาพบุคลากร</h3><button type="button" class="icon-btn" id="closeModal" aria-label="ปิดหน้าต่าง">×</button></div><div class="modal-loading hide" id="modalLoading" role="status" aria-live="polite"><span class="inline-spinner" aria-hidden="true"></span><span id="modalLoadingText">กำลังโหลดรูปภาพจากฐานข้อมูล…</span></div><img id="modalImage" class="hide" alt="รูปภาพบุคลากรที่ส่งเข้าระบบ"><button type="button" class="download-btn hide" id="downloadImage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 17v3h14v-3"/></svg>ดาวน์โหลดรูปภาพ</button></div></div>
+
+  <div class="wait-overlay hide" id="waitOverlay" role="status" aria-live="polite" aria-busy="true">
+    <div class="wait-card"><div class="wait-spinner" aria-hidden="true"></div><h3 id="waitTitle" class="wait-title">กำลังดำเนินการ…</h3><p id="waitDescription" class="wait-desc">กรุณารอสักครู่</p><span class="wait-hint">กรุณาอย่าปิดหน้านี้ระหว่างดำเนินการ</span></div>
+  </div>
+  <script>
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const state = {
+      ready:false, busy:false, photoProcessing:false, imageData:'', previewData:'', imageName:'',
+      token:'', page:1, pages:1, search:'', loading:false, records:[],
+      adminBusy:false, modalRequest:0, listPending:false, listLoaded:false,role:'',username:'',displayName:'',currentPhotoId:'',previewCache:new Map()
+    };
+    let searchTimeout = null;
+    const run = (method, ...args) => new Promise((resolve,reject) => {
+      if (!(window.google && google.script && google.script.run)) {
+        reject(new Error('ต้องเปิดหน้าเว็บผ่าน URL ที่ Deploy จาก Google Apps Script'));return;
+      }
+      google.script.run.withSuccessHandler(resolve)
+        .withFailureHandler(error => reject(new Error(error?.message || 'ไม่สามารถติดต่อระบบได้')))[method](...args);
+    });
+    const errorText = e => (e && e.message) ? e.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+    function notice(element,message,type='error'){element.textContent=message;element.className='notice '+type;}
+    function clearNotice(element){element.textContent='';element.className='notice hide';}
+    function showWait(title,description){$('waitTitle').textContent=title;$('waitDescription').textContent=description;$('waitOverlay').classList.remove('hide');}
+    function hideWait(){$('waitOverlay').classList.add('hide');}
+    function spinText(text){const sp=document.createElement('span');sp.className='inline-spinner';sp.setAttribute('aria-hidden','true');return [sp,document.createTextNode(text)];}
+    function adminMessage(text,busy=false){const el=$('adminNotice');el.replaceChildren(...(busy?spinText(text):[document.createTextNode(text)]));el.classList.toggle('is-busy',busy);}
+    function setBusy(busy){
+      state.busy=busy;$('submitButton').disabled=busy||state.photoProcessing||!state.ready;
+      $('submitLabel').textContent=busy?'กำลังบันทึกรูปภาพ…':'ส่งรูปภาพของฉัน';
+      $('photoFile').disabled=busy;$('fullName').disabled=busy;
+      $('dropZone').style.pointerEvents=busy?'none':'';
+    }
+    async function initialize(){
+      $('systemLabel').textContent='กำลังตรวจสอบระบบ…';
+      try{
+        const info=await run('getAppInfo');state.ready=Boolean(info.ready);
+        $('systemLabel').textContent=state.ready?'ระบบพร้อมใช้งาน':'ยังไม่ได้ตั้งค่าระบบ';
+        $('statusDot').className='dot'+(state.ready?'':' off');
+        $('submitButton').disabled=!state.ready||state.photoProcessing;
+        if(!state.ready)notice($('formNotice'),'ผู้ดูแลระบบยังไม่ได้ตั้งค่า กรุณาเรียกใช้งาน setup() ก่อน');
+      }catch(e){$('systemLabel').textContent='ไม่สามารถเชื่อมต่อได้';notice($('formNotice'),errorText(e));}
+    }
+    function resetPhoto(){
+      ++latestPhotoRequest;state.photoProcessing=false;state.imageData='';state.previewData='';state.imageName='';
+      $('photoPreview').removeAttribute('src');$('photoPreview').classList.remove('visible');
+      $('photoPlaceholder').classList.remove('hide');$('fileInfo').classList.remove('visible','busy');
+      $('fileInfo').replaceChildren();$('photoFile').value='';$('photoPreparing').classList.add('hide');
+      $('submitButton').disabled=state.busy||!state.ready;
+    }
+    async function processPhoto(file){
+      if(!file)return;
+      if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw new Error('กรุณาเลือกไฟล์ JPG, PNG หรือ WEBP');
+      if(file.size>15*1024*1024)throw new Error('ไฟล์ต้นฉบับต้องไม่เกิน 15 MB');
+      const image=await loadImage(file);
+      let data='',dimension=1600,quality=.86;
+      for(let i=0;i<5;i++){
+        const ratio=Math.min(1,dimension/Math.max(image.naturalWidth,image.naturalHeight));
+        const w=Math.max(1,Math.round(image.naturalWidth*ratio));
+        const h=Math.max(1,Math.round(image.naturalHeight*ratio));
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        const context=canvas.getContext('2d',{alpha:false});
+        if(!context)throw new Error('เบราว์เซอร์ไม่รองรับการเตรียมรูปภาพ');
+        context.fillStyle='#ffffff';context.fillRect(0,0,w,h);context.drawImage(image,0,0,w,h);
+        data=canvas.toDataURL('image/jpeg',quality);
+        if(Math.ceil((data.length-'data:image/jpeg;base64,'.length)*.75) < 2*1024*1024)break;
+        dimension=Math.round(dimension*.80);quality=Math.max(.60,quality-.07);
+      }
+      if(Math.ceil((data.length-'data:image/jpeg;base64,'.length)*.75)>2*1024*1024)throw new Error('ไม่สามารถย่อภาพให้ต่ำกว่า 2 MB ได้ กรุณาเลือกภาพใหม่');
+      return data;
+    }
+    function imageFromSrc(src){return new Promise((resolve,reject)=>{
+      const image=new Image();image.onload=()=>resolve(image);
+      image.onerror=()=>reject(new Error('ไม่สามารถอ่านข้อมูลภาพได้'));image.src=src;
+    });}
+    async function makeThumb(source){
+      const image=typeof source==='string'?await imageFromSrc(source):source;
+      let data='';
+      for(let i=0;i<7;i++){
+        const bound=Math.round(420*Math.pow(.84,i));
+        const scale=Math.min(1,bound/Math.max(image.naturalWidth||image.width,image.naturalHeight||image.height));
+        const w=Math.max(1,Math.round((image.naturalWidth||image.width)*scale));
+        const h=Math.max(1,Math.round((image.naturalHeight||image.height)*scale));
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d',{alpha:false});if(!ctx)throw new Error('ไม่สามารถสร้างรูปตัวอย่างได้');
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(image,0,0,w,h);
+        data=c.toDataURL('image/jpeg',Math.max(.43,.72-i*.045));
+        if((data.length-'data:image/jpeg;base64,'.length)*.75<=26*1024)return data;
+      }
+      throw new Error('ไม่สามารถเตรียมรูปย่อได้ กรุณาใช้รูปภาพอื่น');
+    }
+    function loadImage(file){return new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(file);const img=new Image();
+      img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+      img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('ไม่สามารถอ่านไฟล์รูปภาพนี้ได้'))};
+      img.src=url;
+    });}
+    let latestPhotoRequest=0;
+    async function receiveFile(file){
+      if(!file||state.busy)return;
+      const requestId=++latestPhotoRequest;
+      clearNotice($('formNotice'));
+      state.photoProcessing=true;state.imageData='';state.previewData='';state.imageName='';
+      $('photoPreview').classList.remove('visible');$('photoPlaceholder').classList.remove('hide');
+      $('photoPreparing').classList.remove('hide');$('submitButton').disabled=true;
+      $('fileInfo').classList.add('visible','busy');$('fileInfo').replaceChildren(...spinText('กำลังประมวลผลรูปภาพ…'));
+      try{
+        const data=await processPhoto(file);
+        const thumb=await makeThumb(data);
+        if(requestId!==latestPhotoRequest)return;
+        state.imageData=data;state.previewData=thumb;state.imageName=file.name;
+        $('photoPreview').src=data;$('photoPreview').classList.add('visible');
+        $('photoPlaceholder').classList.add('hide');
+        $('fileInfo').classList.remove('busy');
+        $('fileInfo').textContent='✓ '+file.name+' · พร้อมส่ง ('+Math.round(data.length*.75/1024)+' KB)';
+      }catch(e){if(requestId!==latestPhotoRequest)return;resetPhoto();notice($('formNotice'),errorText(e));}
+      finally{
+        if(requestId===latestPhotoRequest){
+          state.photoProcessing=false;$('photoPreparing').classList.add('hide');
+          $('submitButton').disabled=state.busy||!state.ready;
+        }
+      }
+    }
+    $('photoFile').addEventListener('change',e=>receiveFile(e.target.files?.[0]));
+    const drop=$('dropZone');
+    ['dragenter','dragover'].forEach(type=>drop.addEventListener(type,e=>{e.preventDefault();if(!state.busy)drop.classList.add('drag')}));
+    ['dragleave','drop'].forEach(type=>drop.addEventListener(type,e=>{e.preventDefault();drop.classList.remove('drag')}));
+    drop.addEventListener('drop',e=>receiveFile(e.dataTransfer.files?.[0]));
+    $('submissionForm').addEventListener('submit',async e=>{
+      e.preventDefault();if(state.busy||state.photoProcessing)return;clearNotice($('formNotice'));
+      const fullName=$('fullName').value.trim().replace(/\s+/g,' ');
+      if(fullName.length<3){notice($('formNotice'),'กรุณากรอกชื่อ–นามสกุลอย่างน้อย 3 ตัวอักษร');$('fullName').focus();return;}
+      if(!state.imageData){notice($('formNotice'),'กรุณาเลือกรูปภาพก่อนส่ง');return;}
+      if(!state.ready){notice($('formNotice'),'ระบบยังไม่พร้อมใช้งาน');return;}
+      setBusy(true);showWait('กำลังอัปโหลดรูปภาพ','ระบบกำลังบันทึกรูปภาพลง Google Drive และบันทึกข้อมูลลง Google Sheets');
+      try{
+        const result=await run('saveSubmission',{fullName,imageData:state.imageData,previewData:state.previewData});
+        if(!result.success)throw new Error('การบันทึกไม่สำเร็จ');
+        $('formContent').classList.add('hide');$('successContent').classList.remove('hide');
+        $('successReference').textContent='หมายเลขอ้างอิง: '+result.submissionId;
+      }catch(e){notice($('formNotice'),errorText(e));}
+      finally{setBusy(false);hideWait();}
+    });
+    $('newSubmission').addEventListener('click',()=>{
+      $('submissionForm').reset();resetPhoto();$('formContent').classList.remove('hide');
+      $('successContent').classList.add('hide');clearNotice($('formNotice'));$('fullName').focus();
+    });
+
+    // Admin credentials intentionally held only in page memory.
+    function openPublic(){$('adminPage').classList.add('hide');$('publicPage').classList.remove('hide');$('adminSwitchText').textContent='สำหรับผู้ดูแล';window.scrollTo(0,0);}
+    function openAdmin(){$('publicPage').classList.add('hide');$('adminPage').classList.remove('hide');$('adminSwitchText').textContent='กลับหน้าแบบฟอร์ม';window.scrollTo(0,0);if(state.token)refreshRecords();}
+    $('adminSwitch').addEventListener('click',()=>{$('adminPage').classList.contains('hide')?openAdmin():openPublic();});
+    $('loginForm').addEventListener('submit',async e=>{
+      e.preventDefault();clearNotice($('loginNotice'));const password=$('adminPassword').value;const username=$('adminUsername').value.trim();
+      if(state.adminBusy)return;
+      if(!username){notice($('loginNotice'),'กรุณากรอกชื่อบัญชี (Username)');$('adminUsername').focus();return;}
+      if(!password){notice($('loginNotice'),'กรุณากรอกรหัสผ่าน');$('adminPassword').focus();return;}
+      state.adminBusy=true;$('loginButton').disabled=true;$('loginButton').replaceChildren(...spinText(' กำลังตรวจสอบ…'));
+      showWait('กำลังเข้าสู่ระบบ','กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ');
+      try{
+        const response=await run('adminLogin',username,password);state.token=response.token;
+        state.role=response.role;state.username=response.username;state.displayName=response.displayName;
+        $('currentAccount').textContent=response.displayName+' · '+roleLabel(response.role)+' ('+response.username+')';
+        $('ownerManagement').classList.toggle('hide',response.role!=='owner');
+        $('adminPassword').value='';$('adminUsername').value='';$('adminLoginPanel').classList.add('hide');
+        $('adminDashboard').classList.remove('hide');$('logoutButton').classList.remove('hide');
+      }catch(err){notice($('loginNotice'),errorText(err));}
+      finally{
+        state.adminBusy=false;$('loginButton').disabled=false;$('loginButton').textContent='เข้าสู่ระบบ';hideWait();
+      }
+      if(state.token)refreshRecords();
+    });
+    function forceLogout(){
+      state.token='';state.role='';state.username='';state.displayName='';state.records=[];state.listPending=false;state.listLoaded=false;state.previewCache.clear();
+      closeResetPassword();state.adminBusy=false;closeSettings();$('changePasswordForm').reset();$('createUserForm').reset();
+      $('adminLoginPanel').classList.remove('hide');$('adminDashboard').classList.add('hide');
+      $('logoutButton').classList.add('hide');$('adminUsername').value='';$('adminPassword').value='';closeImage();
+    }
+    $('logoutButton').addEventListener('click',()=>{const old=state.token;forceLogout();run('adminLogout',old).catch(()=>{});});
+    function sessionCheck(e){
+      const msg=errorText(e);
+      if(msg.includes('เซสชันหมดอายุ')||msg.includes('กรุณาเข้าสู่ระบบผู้ดูแล'))forceLogout();
+      return msg;
+    }
+    async function refreshRecords(){
+      if(!state.token)return;
+      if(state.loading){state.listPending=true;return;}
+      const token=state.token;
+      state.loading=true;adminMessage('กำลังโหลดข้อมูลจากฐานข้อมูล…',true);
+      if(!state.listLoaded){$('recordsBody').innerHTML='<tr><td colspan="4" class="empty-state"><span class="inline-spinner" aria-hidden="true"></span> กำลังโหลดรายการ…</td></tr>';}
+      $('prevPage').disabled=true;$('nextPage').disabled=true;
+      try{
+        const result=await run('adminList',token,state.page,state.search);
+        if(state.token!==token)return;
+        state.page=result.page;state.pages=result.pages;state.records=result.items;state.listLoaded=true;
+        $('totalCount').textContent=result.totals.all;
+        $('newCount').textContent=result.totals.fresh;
+        $('doneCount').textContent=result.totals.done;
+        adminMessage('พบ '+result.matching+' รายการ · รูปภาพเข้าถึงได้เฉพาะผู้ดูแล');
+        renderRecords();
+      }catch(e){if(state.token===token)adminMessage(sessionCheck(e));}
+      finally{
+        state.loading=false;
+        if(state.token===token && state.listPending){state.listPending=false;refreshRecords();}
+        else if(state.token===token)renderPageButtons();
+      }
+    }
+    function roleLabel(role){return ({owner:'ผู้ดูแลหลัก',editor:'เจ้าหน้าที่แก้ไข',viewer:'ผู้ตรวจสอบ'})[role]||role;}
+    function iconFor(kind){
+      const paths={
+        view:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+        complete:'<path d="M20 6 9 17l-5-5"/>',
+        revert:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+        danger:'<path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/>'
+      };
+      const wrap=document.createElement('span');wrap.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">'+paths[kind]+'</svg>';
+      return wrap.firstElementChild;
+    }
+    function makeAction(label,click,kind){
+      const b=document.createElement('button');b.type='button';b.className='sm-btn '+kind;
+      b.append(iconFor(kind),document.createTextNode(label));b.addEventListener('click',click);
+      b.disabled=state.adminBusy;return b;
+    }
+    function renderPageButtons(){
+      $('pageNumber').textContent=state.page+' / '+state.pages;
+      $('prevPage').disabled=state.loading||state.adminBusy||state.page<=1;
+      $('nextPage').disabled=state.loading||state.adminBusy||state.page>=state.pages;
+    }
+    function renderRecords(){
+      const body=$('recordsBody');body.replaceChildren();
+      if(!state.records.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=4;td.className='empty-state';td.textContent='ยังไม่มีรายการที่ตรงกับการค้นหา';tr.append(td);body.append(tr);}
+      state.records.forEach(record=>{
+        const tr=document.createElement('tr');const name=document.createElement('td');name.className='name-cell';name.textContent=record.name;
+        const date=document.createElement('td');date.textContent=record.date;
+        const status=document.createElement('td');const badge=document.createElement('span');badge.className='status-badge '+(record.status==='ใหม่'?'new':'finished');badge.textContent=record.status;status.append(badge);
+        const actions=document.createElement('td');const area=document.createElement('div');area.className='table-actions';
+        area.append(makeAction('ดูรูป',()=>showImage(record.id),'view'));
+        if(state.role==='owner'||state.role==='editor')area.append(makeAction(record.status==='ใหม่'?'เสร็จแล้ว':'ย้อนกลับ',()=>updateStatus(record),record.status==='ใหม่'?'complete':'revert'));
+        if(state.role==='owner')area.append(makeAction('ลบ',()=>deleteRecord(record),'danger'));
+        actions.append(area);tr.append(name,date,status,actions);body.append(tr);
+      });
+      renderPageButtons();
+    }
+    $('prevPage').addEventListener('click',()=>{if(state.page>1&&!state.loading&&!state.adminBusy){state.page--;refreshRecords();}});
+    $('nextPage').addEventListener('click',()=>{if(state.page<state.pages&&!state.loading&&!state.adminBusy){state.page++;refreshRecords();}});
+    $('searchInput').addEventListener('input',e=>{
+      clearTimeout(searchTimeout);searchTimeout=setTimeout(()=>{
+        state.search=$('searchInput').value.trim();state.page=1;refreshRecords();
+      },320);
+    });
+    async function mutateRecord(action,record,actionLabel,status){
+      if(state.adminBusy)return;
+      state.adminBusy=true;showWait(actionLabel,'กำลังอัปเดตข้อมูลใน Google Sheets / Google Drive');
+      try{
+        if(action==='update')await run('adminUpdateStatus',state.token,record.id,status);
+        else await run('adminDelete',state.token,record.id);
+        // Re-fetch after server confirms the update; never show false completion.
+        state.listPending=false;
+      }catch(e){alert(sessionCheck(e));}
+      finally{state.adminBusy=false;hideWait();}
+      if(state.token)await refreshRecords();
+    }
+    function updateStatus(record){mutateRecord('update',record,record.status==='ใหม่'?'กำลังบันทึกสถานะดำเนินการแล้ว':'กำลังย้อนกลับสถานะ',record.status==='ใหม่'?'ดำเนินการแล้ว':'ใหม่');}
+    function deleteRecord(record){
+      if(state.adminBusy)return;
+      if(!confirm('ต้องการลบข้อมูลและย้ายรูปภาพของ "'+record.name+'" ไปถังขยะ Google Drive ใช่หรือไม่?'))return;
+      mutateRecord('delete',record,'กำลังลบรายการ');
+    }
+    function setModalMessage(message,error=false){
+      $('modalLoading').classList.remove('hide');$('modalLoading').classList.toggle('error',error);
+      $('modalLoadingText').textContent=message;
+    }
+    async function showImage(id){
+      const request=++state.modalRequest;
+      state.currentPhotoId=id;
+      $('imageOverlay').classList.remove('hide');syncModalScroll();$('modalTitle').textContent='ตัวอย่างรูปภาพบุคลากร';
+      $('modalImage').classList.add('hide');$('modalImage').removeAttribute('src');
+      $('downloadImage').classList.add('hide');setModalMessage('กำลังโหลดรูปตัวอย่างขนาดเล็ก…');
+      try{
+        let result=state.previewCache.get(id);
+        if(!result)result=await run('adminGetImage',state.token,id);
+        if(request!==state.modalRequest||$('imageOverlay').classList.contains('hide'))return;
+        const img=$('modalImage');
+        await new Promise((resolve,reject)=>{
+          img.onload=resolve;img.onerror=()=>reject(new Error('ไม่สามารถแสดงรูปภาพได้'));
+          img.src=result.imageData;
+          if(img.complete&&img.naturalWidth)resolve();
+        });
+        if(request!==state.modalRequest||$('imageOverlay').classList.contains('hide'))return;
+        img.classList.remove('hide');$('modalTitle').textContent=result.name;
+        $('downloadImage').classList.remove('hide');$('modalLoading').classList.add('hide');
+        if(result.thumbnail){
+          state.previewCache.set(id,result);
+          if(state.previewCache.size>16)state.previewCache.delete(state.previewCache.keys().next().value);
+        }else{
+          // Upgrade old submissions in the background; current open does not wait.
+          makeThumb(result.imageData).then(preview=>{
+            if(!state.token)return;
+            state.previewCache.set(id,{imageData:preview,name:result.name,thumbnail:true});
+            return run('adminStorePreview',state.token,id,preview);
+          }).catch(()=>{});
+        }
+      }catch(e){if(request===state.modalRequest)setModalMessage(sessionCheck(e),true);}
+    }
+    function closeImage(){
+      ++state.modalRequest;state.currentPhotoId='';$('imageOverlay').classList.add('hide');syncModalScroll();
+      $('modalImage').onload=null;$('modalImage').onerror=null;$('modalImage').removeAttribute('src');
+      $('modalImage').classList.add('hide');$('downloadImage').classList.add('hide');
+    }
+    $('downloadImage').addEventListener('click',async()=>{
+      const id=state.currentPhotoId;if(!id||!state.token)return;
+      const button=$('downloadImage');button.disabled=true;
+      button.replaceChildren(...spinText(' กำลังดาวน์โหลดไฟล์ต้นฉบับ…'));
+      try{
+        const result=await run('adminDownloadImage',state.token,id);
+        if(state.currentPhotoId!==id)return;
+        const a=document.createElement('a');a.href=result.imageData;
+        a.download='รูปภาพ_'+result.name.replace(/[^\p{L}\p{M}\p{N} _-]/gu,'').slice(0,80)+'.jpg';
+        document.body.append(a);a.click();a.remove();
+      }catch(e){alert(sessionCheck(e));}
+      finally{button.disabled=false;button.textContent='⬇ ดาวน์โหลดรูปภาพต้นฉบับ';}
+    });
+    // Account administration (the server revalidates role on EVERY operation).
+    let settingsReturnFocus=null;
+    let resetUsername='';
+    function syncModalScroll(){document.body.classList.toggle('modal-open',!$('settingsOverlay').classList.contains('hide')||!$('resetPasswordOverlay').classList.contains('hide')||!$('imageOverlay').classList.contains('hide'));}
+    function switchSettingsTab(tab){
+      const showUsers=tab==='users'&&state.role==='owner';
+      $('settingsTabPassword').classList.toggle('active',!showUsers);
+      $('settingsTabPassword').setAttribute('aria-selected',String(!showUsers));
+      $('settingsTabUsers').classList.toggle('active',showUsers);
+      $('settingsTabUsers').setAttribute('aria-selected',String(showUsers));
+      $('passwordSettingsTab').classList.toggle('hide',showUsers);
+      $('ownerManagement').classList.toggle('hide',!showUsers);
+      if(showUsers)refreshUsers();
+    }
+    function openSettings(){
+      if(!state.token)return;
+      settingsReturnFocus=document.activeElement;
+      $('settingsTabUsers').classList.toggle('hide',state.role!=='owner');
+      clearNotice($('passwordNotice'));clearNotice($('userNotice'));
+      switchSettingsTab('password');
+      $('settingsOverlay').classList.remove('hide');syncModalScroll();
+      $('closeSettings').focus();
+    }
+    function closeSettings(){
+      if(state.adminBusy)return;
+      $('settingsOverlay').classList.add('hide');
+      $('changePasswordForm').reset();$('createUserForm').reset();
+      syncModalScroll();
+      if(settingsReturnFocus&&settingsReturnFocus.isConnected&&state.token)settingsReturnFocus.focus();
+      settingsReturnFocus=null;
+    }
+    function openResetPassword(username){
+      if(state.role!=='owner'||state.adminBusy)return;
+      resetUsername=username;
+      $('resetPasswordForm').reset();clearNotice($('resetPasswordNotice'));
+      $('resetPasswordAccount').textContent='กำหนดรหัสผ่านใหม่สำหรับบัญชี '+username+' (อย่างน้อย 12 ตัวอักษร มีตัวอักษรและตัวเลข)';
+      $('resetPasswordOverlay').classList.remove('hide');syncModalScroll();
+      $('resetPasswordInput').focus();
+    }
+    function closeResetPassword(){
+      $('resetPasswordOverlay').classList.add('hide');
+      resetUsername='';$('resetPasswordForm').reset();syncModalScroll();
+      if(!$('settingsOverlay').classList.contains('hide'))$('settingsTabUsers').focus();
+    }
+    $('settingsToggle').addEventListener('click',openSettings);
+    $('closeSettings').addEventListener('click',closeSettings);
+    $('settingsDone').addEventListener('click',closeSettings);
+    $('settingsTabPassword').addEventListener('click',()=>switchSettingsTab('password'));
+    $('settingsTabUsers').addEventListener('click',()=>switchSettingsTab('users'));
+    $('settingsOverlay').addEventListener('click',e=>{if(e.target===$('settingsOverlay'))closeSettings();});
+    $('closeResetPassword').addEventListener('click',closeResetPassword);
+    $('cancelResetPassword').addEventListener('click',closeResetPassword);
+    $('resetPasswordOverlay').addEventListener('click',e=>{if(e.target===$('resetPasswordOverlay')&&!state.adminBusy)closeResetPassword();});
+    $('resetPasswordForm').addEventListener('submit',async e=>{
+      e.preventDefault();if(state.adminBusy||!resetUsername||state.role!=='owner')return;
+      const next=$('resetPasswordInput').value,confirm=$('resetPasswordConfirm').value;
+      if(next!==confirm){notice($('resetPasswordNotice'),'ยืนยันรหัสผ่านใหม่ไม่ตรงกัน');return;}
+      if(next.length<12||!/[a-zA-Z]/.test(next)||!/[0-9]/.test(next)){
+        notice($('resetPasswordNotice'),'รหัสผ่านต้องมีอย่างน้อย 12 ตัวอักษร มีทั้งตัวอักษรอังกฤษและตัวเลข');return;
+      }
+      const username=resetUsername;
+      try{
+        await editUser(username,{password:next},'กำลังตั้งรหัสผ่านใหม่');
+        closeResetPassword();
+      }catch(err){notice($('resetPasswordNotice'),sessionCheck(err));}
+    });
+    $('changePasswordForm').addEventListener('submit',async e=>{
+      e.preventDefault();if(state.adminBusy)return;
+      const current=$('currentPassword').value,next=$('newPassword').value,confirm=$('confirmPassword').value;
+      if(next!==confirm){notice($('passwordNotice'),'การยืนยันรหัสผ่านใหม่ไม่ตรงกัน');return;}
+      if(next.length<12||!/[a-zA-Z]/.test(next)||!/[0-9]/.test(next)){
+        notice($('passwordNotice'),'รหัสผ่านใหม่ต้องมีอย่างน้อย 12 ตัวอักษร รวมตัวอักษรและตัวเลข');return;
+      }
+      state.adminBusy=true;showWait('กำลังเปลี่ยนรหัสผ่าน','กำลังอัปเดตรหัสผ่านบัญชีของคุณ');
+      try{
+        await run('adminChangePassword',state.token,current,next);
+        forceLogout();notice($('loginNotice'),'เปลี่ยนรหัสผ่านสำเร็จ กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่','success');
+      }catch(err){notice($('passwordNotice'),sessionCheck(err));}
+      finally{state.adminBusy=false;hideWait();}
+    });
+    async function refreshUsers(){
+      if(state.role!=='owner'||!state.token)return;
+      $('usersBody').replaceChildren();const tr=document.createElement('tr'),td=document.createElement('td');
+      td.colSpan=5;td.className='empty-state';td.append(...spinText(' กำลังโหลดบัญชีผู้ใช้…'));
+      tr.append(td);$('usersBody').append(tr);
+      try{
+        const users=await run('adminListUsers',state.token);
+        renderUsers(users);
+      }catch(err){notice($('userNotice'),sessionCheck(err));}
+    }
+    function renderUsers(users){
+      const body=$('usersBody');body.replaceChildren();
+      if(!users.length){const tr=document.createElement('tr'),td=document.createElement('td');
+        td.colSpan=5;td.className='empty-state';td.textContent='ยังไม่มีบัญชีผู้ใช้เพิ่มเติม';tr.append(td);body.append(tr);return;}
+      users.forEach(u=>{
+        const tr=document.createElement('tr');
+        const a=document.createElement('td');a.textContent=u.username;
+        const b=document.createElement('td');b.textContent=u.name;
+        const c=document.createElement('td');const roleSelect=document.createElement('select');
+        roleSelect.className='form-select';roleSelect.style.height='36px';roleSelect.style.minWidth='140px';
+        [['viewer','ผู้ตรวจสอบ'],['editor','เจ้าหน้าที่แก้ไข']].forEach(([v,l])=>{const opt=document.createElement('option');opt.value=v;opt.textContent=l;roleSelect.append(opt);});
+        roleSelect.value=u.role;
+        roleSelect.addEventListener('change',async()=>{
+          try{await editUser(u.username,{role:roleSelect.value},'กำลังเปลี่ยนสิทธิ์');}
+          catch(err){roleSelect.value=u.role;}
+        });c.append(roleSelect);
+        const d=document.createElement('td');const status=document.createElement('span');status.className='status-badge '+(u.active?'finished':'new');
+        status.textContent=u.active?'ใช้งาน':'ปิดใช้งาน';d.append(status);
+        const e=document.createElement('td'),area=document.createElement('div');area.className='table-actions';
+        const activeButton=document.createElement('button');activeButton.className='sm-btn '+(u.active?'revert':'complete');
+        activeButton.textContent=u.active?'ระงับสิทธิ์':'เปิดสิทธิ์';
+        activeButton.addEventListener('click',()=>{editUser(u.username,{active:!u.active},'กำลังอัปเดตสถานะบัญชี').catch(()=>{});});
+        const passButton=document.createElement('button');passButton.className='sm-btn view';passButton.textContent='ตั้งรหัสใหม่';
+        passButton.addEventListener('click',()=>openResetPassword(u.username));
+        const delButton=document.createElement('button');delButton.className='sm-btn danger';delButton.textContent='ลบบัญชี';
+        delButton.addEventListener('click',async()=>{
+          if(!confirm('ยืนยันลบบัญชี '+u.username+' ? ผู้ใช้นี้จะเข้าสู่ระบบไม่ได้ทันที'))return;
+          if(state.adminBusy)return;
+          state.adminBusy=true;showWait('กำลังลบบัญชีผู้ใช้','กรุณารอสักครู่');
+          try{await run('adminDeleteUser',state.token,u.username);await refreshUsers();notice($('userNotice'),'ลบบัญชีเรียบร้อยแล้ว','success');}
+          catch(err){notice($('userNotice'),sessionCheck(err));}
+          finally{state.adminBusy=false;hideWait();}
+        });
+        area.append(activeButton,passButton,delButton);e.append(area);tr.append(a,b,c,d,e);body.append(tr);
+      });
+    }
+    async function editUser(username,patch,waiting){
+      if(state.adminBusy)return;
+      state.adminBusy=true;showWait(waiting,'กำลังบันทึกการเปลี่ยนแปลง');
+      try{
+        await run('adminModifyUser',state.token,username,patch);
+        await refreshUsers();notice($('userNotice'),'บันทึกข้อมูลผู้ใช้สำเร็จ','success');
+      }catch(err){notice($('userNotice'),sessionCheck(err));throw err;}
+      finally{state.adminBusy=false;hideWait();}
+    }
+    $('createUserForm').addEventListener('submit',async e=>{
+      e.preventDefault();if(state.adminBusy)return;
+      const data={username:$('newUsername').value.trim(),name:$('newDisplayName').value.trim(),
+        password:$('newUserPassword').value,role:$('newUserRole').value};
+      state.adminBusy=true;showWait('กำลังเพิ่มบัญชีผู้ใช้','กำลังบันทึกสิทธิ์ของบุคลากร');
+      try{
+        await run('adminCreateUser',state.token,data);$('createUserForm').reset();
+        await refreshUsers();notice($('userNotice'),'เพิ่มบัญชีผู้ใช้เรียบร้อยแล้ว','success');
+      }catch(err){notice($('userNotice'),sessionCheck(err));}
+      finally{state.adminBusy=false;hideWait();}
+    });
+    $('closeModal').addEventListener('click',closeImage);
+    $('imageOverlay').addEventListener('click',e=>{if(e.target===$('imageOverlay'))closeImage();});
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){
+        if(!$('resetPasswordOverlay').classList.contains('hide')){if(!state.adminBusy)closeResetPassword();e.preventDefault();return;}
+        if(!$('settingsOverlay').classList.contains('hide')){closeSettings();e.preventDefault();return;}
+        if(!$('imageOverlay').classList.contains('hide')){closeImage();e.preventDefault();return;}
+      }
+      if(e.key==='Tab'){
+        const layer=!$('resetPasswordOverlay').classList.contains('hide')?$('resetPasswordOverlay'):
+          (!$('settingsOverlay').classList.contains('hide')?$('settingsOverlay'):null);
+        if(!layer)return;
+        const controls=[...layer.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),a[href]')]
+          .filter(el=>el.getClientRects().length>0 && !el.closest('.hide'));
+        if(!controls.length)return;
+        const first=controls[0],last=controls[controls.length-1];
+        if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+        else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      }
+    });
+    initialize();
+  </script>
+</body>
+</html>
