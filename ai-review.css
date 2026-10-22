@@ -1,0 +1,45 @@
+/* Phase 2 photo review. Isolated .ai2-* styles. */
+body.ai2-modal-open{overflow:hidden}
+.ai2-overlay{position:fixed;z-index:10010;inset:0;background:rgba(10,33,27,.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:14px}
+.ai2-overlay.hide,.ai2-inner .hide{display:none!important}
+.ai2-modal{background:#fff;border-radius:24px;box-shadow:0 30px 90px #09281c77;width:min(1140px,100%);max-height:min(94vh,1050px);display:flex;flex-direction:column;overflow:hidden;color:#143d2f;font-family:inherit}
+.ai2-head{display:flex;align-items:center;gap:13px;padding:23px 25px 18px;background:#f5faf7;border-bottom:1px solid #e0ece4}
+.ai2-mark{display:grid;place-items:center;background:#eee4ff;color:#8049c7;border-radius:13px;font-size:24px;width:54px;height:54px;flex-shrink:0}
+.ai2-heading{min-width:0;flex:1}.ai2-eyebrow{font-size:11px!important;color:#7e49b8!important;font-weight:750;letter-spacing:.12em;margin:0 0 2px!important}
+.ai2-heading h2{font-size:24px;letter-spacing:-.5px;margin:0 0 2px;font-weight:800}.ai2-heading p{color:#7a9386;margin:0;font-size:13px}
+.ai2-close{border:1px solid #e0eae3;border-radius:12px;background:#fff;color:#173f32;font-size:26px;width:45px;height:45px;cursor:pointer;flex-shrink:0}
+.ai2-inner{padding:22px 25px 25px;overflow:auto;min-height:0;display:grid;gap:15px}
+.ai2-banner{background:#f1f7fc;color:#466e92;border:1px solid #d5e5f2;border-radius:13px;padding:13px 15px;font-size:13px;line-height:1.65}
+.ai2-details{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.ai2-outfit{color:#244d3a;font-size:14px;font-weight:700}
+.ai2-status{display:inline-flex;background:#eef2f3;color:#5d7473;border-radius:20px;padding:7px 12px;font-size:12px;font-weight:750}
+.ai2-status[data-status="approved"]{background:#e6f6ed;color:#11774f}.ai2-status[data-status="pending"]{background:#fff3de;color:#a26511}
+.ai2-status[data-status="rejected"]{background:#ffeded;color:#a93434}
+.ai2-compare{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.ai2-photo-card{border:1px solid #e0ebe5;border-radius:16px;background:#fbfdfa;overflow:hidden;min-width:0}
+.ai2-edited-card{background:#f9f6fe;border-color:#e9ddf7}
+.ai2-photo-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;font-size:13px}
+.ai2-photo-head b{font-weight:800}.ai2-photo-head span{color:#8ba097;font-size:11px}
+.ai2-photo-frame{height:280px;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,#f0f6f1,#eaf4ef);overflow:hidden}
+.ai2-edited-card .ai2-photo-frame{background:linear-gradient(140deg,#f4effa,#f0e8fa)}
+.ai2-photo-frame img{width:100%;height:100%;object-fit:contain;display:block}
+.ai2-empty{color:#83988c;font-size:13px;text-align:center;padding:18px}
+.ai2-photo-foot{color:#789084;font-size:12px;line-height:1.6;padding:10px 14px;margin:0!important}
+.ai2-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.ai2-panel{padding:17px;border-radius:16px;background:#f8fbf9;border:1px solid #e0ece4;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.ai2-reviewer{background:#fcfaff;border-color:#e9dff3}
+.ai2-panel h3{font-size:15px;font-weight:800;margin:0}.ai2-panel p{color:#789083;margin:0;font-size:12px;line-height:1.6}
+.ai2-file-label{font-size:12px;font-weight:750}.ai2-panel input[type=file]{border:1px solid #dbe9df;background:#fff;padding:10px;border-radius:9px;width:100%;max-width:100%;font-size:12px;color:#3f594c}
+.ai2-selected{font-size:12px;color:#668476;min-height:16px;overflow-wrap:anywhere}
+.ai2-btn{border:1px solid #d8e7df;background:#fff;color:#275b44;border-radius:11px;padding:12px 15px;font-family:inherit;font-size:13px;font-weight:750;line-height:1.2;cursor:pointer;transition:transform .15s,filter .15s;min-height:42px}
+.ai2-btn:not(:disabled):hover{filter:brightness(.96);transform:translateY(-1px)}.ai2-btn:disabled{opacity:.47;cursor:not-allowed}
+.ai2-btn.primary{background:#7044c1;color:#fff;border-color:#7044c1;width:100%}
+.ai2-btn.success{background:#0f805a;color:#fff;border-color:#0f805a}.ai2-btn.danger{background:#fff5f5;border-color:#ffd6da;color:#b63142}
+.ai2-btn.outline{background:#fff;color:#375c4a}
+.ai2-review-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ai2-message{border-radius:11px;background:#edf8f3;color:#1b7654;padding:12px 14px;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.ai2-message.error{background:#fff1f1;color:#b53545}
+.ai2-approved{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 14px;background:#edf9f1;border:1px solid #cfebd9;border-radius:12px;color:#27714e;font-size:13px;font-weight:700}
+/* Integrate with original AI Studio footer */
+#outfitOpenReview{background:#7044c1;color:#fff;border-color:#7044c1}
+@media(max-width:700px){.ai2-overlay{padding:6px}.ai2-modal{border-radius:15px;max-height:97vh}.ai2-head{padding:13px}.ai2-mark{width:42px;height:42px;font-size:20px}.ai2-heading h2{font-size:18px}.ai2-inner{padding:12px;gap:11px}.ai2-compare,.ai2-grid{grid-template-columns:minmax(0,1fr)}.ai2-photo-frame{height:230px}.ai2-approved{flex-wrap:wrap}.ai2-approved button{width:100%}.ai2-photo-head{font-size:12px}}
