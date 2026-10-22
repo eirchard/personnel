@@ -1,0 +1,50 @@
+/* Prompt Atelier / Personnel Photo Portal — Outfit Studio Phase 1. Scoped CSS only. */
+.sm-btn.outfit{background:#f1eaff;border-color:#dccafa;color:#7140b6}
+.sm-btn.outfit:hover:not(:disabled){background:#e8dafa;border-color:#cab1f4}
+.outfit-manage-btn{background:#f1eaff!important;border-color:#d9c5f4!important;color:#6c39aa!important}
+.outfit-shade{position:fixed;inset:0;z-index:48;display:flex;align-items:center;justify-content:center;padding:17px;background:rgba(10,31,22,.70);backdrop-filter:blur(4px)}
+.outfit-modal{width:min(1060px,100%);max-height:min(92dvh,950px);display:flex;flex-direction:column;background:#fff;border:1px solid #e6ece8;border-radius:22px;overflow:hidden;box-shadow:0 26px 90px rgba(3,22,13,.32);font-family:'IBM Plex Sans Thai','Prompt',sans-serif}
+.outfit-head{padding:19px 23px;background:linear-gradient(110deg,#f1faf4,#fff);border-bottom:1px solid #e3ebe5;display:flex;align-items:flex-start;gap:13px}
+.outfit-head-icon{width:43px;height:43px;border-radius:13px;background:#eee5ff;display:grid;place-items:center;color:#7847be;flex:0 0 auto;font-size:24px}
+.outfit-head h2{font:600 22px/1.45 'Prompt',sans-serif;color:#173f2b;margin:0 0 3px}
+.outfit-head p{color:#75847a;font-size:12px;margin:0}
+.outfit-head-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.outfit-close{width:36px;height:36px;background:#fff;border:1px solid #e1e9e3;border-radius:10px;font-size:23px;color:#42594c}
+.outfit-body{overflow:auto;min-height:0;padding:22px 23px 27px;overscroll-behavior:contain}
+.outfit-note{background:#f3f7fb;border:1px solid #d9e6ef;color:#567185;padding:11px 13px;border-radius:12px;font-size:12px;line-height:1.8;margin:0 0 18px}
+.outfit-note.alert{border-color:#f3dfbd;background:#fff9ec;color:#946522}
+.outfit-columns{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:20px}
+.outfit-label{font-weight:700;font-size:13px;color:#264b37;margin:0 0 10px}
+.outfit-photo{background:#eff4f0;border:1px solid #dce7df;border-radius:14px;min-height:230px;aspect-ratio:3/4;display:grid;place-items:center;overflow:hidden;color:#889b8d;font-size:13px;text-align:center}
+.outfit-photo img{width:100%;height:100%;object-fit:contain;max-height:440px}
+.outfit-choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.outfit-choice{padding:8px;border-radius:12px;border:2px solid #e5ebe6;background:#fff;text-align:left;cursor:pointer;color:inherit;min-width:0}
+.outfit-choice:hover{border-color:#b5cdbd;background:#f9fcfa}.outfit-choice.selected{border-color:#177d58;box-shadow:0 0 0 2px #ddf2e5}
+.outfit-choice:focus-visible{outline:3px solid #86b7da;outline-offset:2px}
+.outfit-choice img{display:block;width:100%;aspect-ratio:3/3.5;object-fit:contain;background:#edf4ef;border-radius:8px}
+.outfit-choice-title{font-weight:700;font-size:12px;line-height:1.4;margin:8px 1px 1px;overflow-wrap:anywhere}
+.outfit-choice-type{font-size:10px;color:#718377;line-height:1.35;margin:0 1px 2px}
+.outfit-pill{display:inline-block;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;color:#25734e;background:#e4f6eb}
+.outfit-pill.off{color:#9c6424;background:#fff1d6}
+.outfit-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:19px;padding-top:16px;border-top:1px solid #e9efea;flex-wrap:wrap}
+.outfit-actions{display:flex;gap:8px;flex-wrap:wrap}
+.outfit-btn{border:1px solid #d4e3d8;background:#fff;color:#225841;border-radius:10px;padding:10px 14px;font-weight:700;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.outfit-btn.primary{background:#116e51;color:#fff;border-color:#116e51}.outfit-btn.primary:hover{background:#0d5b41}
+.outfit-btn.purple{background:#7446bd;color:#fff;border-color:#7446bd}.outfit-btn.purple:hover{background:#5b2eab}
+.outfit-btn.danger{border-color:#f4c7ca;background:#fff0f1;color:#b02e39}.outfit-btn:disabled{opacity:.48;cursor:not-allowed}
+.outfit-muted{font-size:12px;color:#738278;line-height:1.6}.outfit-loading{display:inline-flex;align-items:center;gap:9px;color:#35745a;font-size:13px;font-weight:600}
+.outfit-spin{width:18px;height:18px;border:2px solid #d3e7d8;border-top-color:#198c5f;border-radius:50%;animation:outfit-spin .7s linear infinite}@keyframes outfit-spin{to{transform:rotate(360deg)}}
+.outfit-manager-grid{display:grid;grid-template-columns:minmax(230px,.7fr) minmax(0,1.3fr);gap:21px}
+.outfit-form{padding:18px;border-radius:15px;border:1px solid #dfece3;background:#f9fcfa}
+.outfit-form label{font-size:12px;color:#2c5039;font-weight:700;display:block;margin-bottom:6px}
+.outfit-form input,.outfit-form select{width:100%;border-radius:10px;border:1px solid #d5e3da;background:#fff;min-height:42px;padding:9px 11px;outline:none;font:inherit;color:#274c36}
+.outfit-form .group{margin-bottom:13px}.outfit-form .outfit-btn{width:100%;margin-top:3px}
+.outfit-management-list{display:grid;gap:11px}.outfit-management-item{display:flex;align-items:center;gap:12px;border:1px solid #e5ece6;border-radius:12px;padding:11px}
+.outfit-management-item img{width:76px;height:86px;object-fit:contain;border-radius:8px;background:#edf4ef;flex:0 0 auto}
+.outfit-management-details{min-width:0;flex:1}.outfit-management-details strong{font-size:12px;color:#244637;display:block;overflow-wrap:anywhere}
+.outfit-management-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.outfit-management-actions .outfit-btn{padding:6px 10px;font-size:11px}
+.outfit-message{font-size:12px;line-height:1.7;padding:10px 12px;border-radius:10px;background:#f0f7f3;color:#246045;margin-top:12px}
+.outfit-message.error{background:#fff1f1;color:#a02d37}
+.outfit-empty{padding:35px 15px;color:#809186;text-align:center;border:1px dashed #d6e5da;border-radius:13px;font-size:13px}
+@media(max-width:760px){.outfit-shade{padding:6px;align-items:center}.outfit-modal{max-height:calc(100dvh - 12px);border-radius:15px}.outfit-head{padding:15px}.outfit-head h2{font-size:17px}.outfit-head-icon{width:35px;height:35px;font-size:19px}.outfit-body{padding:15px}.outfit-columns,.outfit-manager-grid{grid-template-columns:1fr}.outfit-photo{min-height:165px;aspect-ratio:auto;max-height:250px}.outfit-photo img{max-height:250px}.outfit-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.outfit-management-item{align-items:flex-start}.outfit-management-item img{width:62px;height:72px}.outfit-actions{width:100%}.outfit-actions .outfit-btn{flex:1}}
