@@ -8,6 +8,33 @@
   const getToken=()=>typeof state==='object'?state.token:'';
   const canUse=()=>Boolean(getToken()&&['owner','editor'].includes(getRole()));
   const canManage=()=>Boolean(getToken()&&getRole()==='owner');
+
+  // Dedicated Phase 1 API client: avoid stale main-page RPC allowlists.
+  // Authorization still happens on the server for every request.
+  const STUDIO_METHODS=new Set(['adminListOutfits','adminCreateOutfit','adminRenameOutfit','adminToggleOutfit','adminDeleteOutfit','adminGetPhotoEdit','adminChooseOutfit','adminGetImage']);
+  async function studioRun(method,...args){
+    if(!STUDIO_METHODS.has(method))throw new Error('คำสั่ง AI Studio ไม่ถูกต้อง');
+    const endpoint=String(window.PERSONNEL_CONFIG?.apiBaseUrl||'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api').trim();
+    const ctrl=new AbortController();
+    const clock=setTimeout(()=>ctrl.abort(),method==='adminCreateOutfit'?115000:65000);
+    try{
+      const response=await fetch(endpoint,{method:'POST',mode:'cors',cache:'no-store',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify({method,args}),signal:ctrl.signal});
+      let payload;
+      try{payload=await response.json();}catch(_){throw new Error('API ส่งข้อมูลกลับมาไม่ใช่ JSON โปรดตรวจสอบการ Deploy');}
+      if(!response.ok||!payload||!payload.ok){
+        const reason=String(payload?.error||('HTTP '+response.status));
+        if(reason==='ไม่รองรับคำสั่งนี้'||reason==='คำสั่งไม่ถูกต้อง')
+          throw new Error('ระบบหลังบ้านยังไม่รองรับ '+method+' โปรดตรวจสอบเวอร์ชัน Apps Script และ Cloudflare Worker');
+        throw new Error(reason);
+      }
+      return payload.data;
+    }catch(e){
+      if(e?.name==='AbortError')throw new Error('การเชื่อมต่อใช้เวลานานเกินไป');
+      throw e;
+    }finally{clearTimeout(clock);}
+  }
+
   const q=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
   const panel=q('div','outfit-shade hide');panel.id='outfitPhase1Overlay';panel.setAttribute('role','presentation');
   panel.innerHTML=`<section class="outfit-modal" role="dialog" aria-modal="true" aria-labelledby="outfitDialogTitle">
@@ -83,7 +110,7 @@
       tools.append(rename,toggle,del);details.append(strong,meta,tools);item.append(img,details);grid.append(item);
     });
   }
-  async function fetchTemplates(){const res=await run('adminListOutfits',getToken());
+  async function fetchTemplates(){const res=await studioRun('adminListOutfits',getToken());
     templates=Array.isArray(res.items)?res.items:[];return templates;}
   async function open(record){
     if(!canUse()||!initOpen())return;
@@ -96,7 +123,7 @@
     noTemplates($('outfitChoices'),'กำลังโหลดคลังชุด…');$('outfitSaveChoice').disabled=true;$('outfitCurrentChoice').textContent='กำลังตรวจสอบชุดที่บันทึกไว้…';
     const request=++loadingId;
     try{
-      const [a,b,c]=await Promise.all([fetchTemplates(),run('adminGetImage',getToken(),record.id),run('adminGetPhotoEdit',getToken(),record.id)]);
+      const [a,b,c]=await Promise.all([fetchTemplates(),studioRun('adminGetImage',getToken(),record.id),studioRun('adminGetPhotoEdit',getToken(),record.id)]);
       if(request!==loadingId||!visible)return;
       const orig=$('outfitOriginalPhoto');orig.replaceChildren();
       if(b?.imageData){const image=q('img');image.src=b.imageData;image.alt='ภาพต้นฉบับ '+record.name;orig.append(image);}else orig.textContent='ไม่พบภาพต้นฉบับ';
@@ -122,9 +149,9 @@
     if(action==='toggle'&&!confirm((t.active?'ปิด':'เปิด')+'การใช้งานชุด “'+t.name+'” ?'))return;
     setBusy(true);msg('กำลังบันทึกการเปลี่ยนแปลง…');
     try{
-      if(action==='rename')result=await run('adminRenameOutfit',getToken(),t.id,newValue);
-      if(action==='toggle')result=await run('adminToggleOutfit',getToken(),t.id,!t.active);
-      if(action==='delete')result=await run('adminDeleteOutfit',getToken(),t.id);
+      if(action==='rename')result=await studioRun('adminRenameOutfit',getToken(),t.id,newValue);
+      if(action==='toggle')result=await studioRun('adminToggleOutfit',getToken(),t.id,!t.active);
+      if(action==='delete')result=await studioRun('adminDeleteOutfit',getToken(),t.id);
       await fetchTemplates();renderManageList();msg('บันทึกเรียบร้อยแล้ว');
     }catch(e){msg(apiError(e),true);}finally{setBusy(false);renderManageList();}
   }
@@ -150,7 +177,7 @@
     try{
       const data=await prepareImage(file);
       msg('กำลังบันทึกคลังชุดลง Google Drive และ Google Sheets…');
-      await run('adminCreateOutfit',getToken(),{name:$('outfitNewName').value.trim(),type:$('outfitNewType').value,...data});
+      await studioRun('adminCreateOutfit',getToken(),{name:$('outfitNewName').value.trim(),type:$('outfitNewType').value,...data});
       $('outfitCreateForm').reset();await fetchTemplates();renderManageList();msg('เพิ่มชุดในคลังเรียบร้อยแล้ว');
     }catch(e){msg(apiError(e),true);}finally{setBusy(false);renderManageList();}
   });
@@ -159,7 +186,7 @@
     const outfit=templates.find(t=>t.id===chosen&&t.active);if(!outfit)return;
     setBusy(true);msg('กำลังบันทึกชุดที่เลือก…');
     try{
-      await run('adminChooseOutfit',getToken(),photo.id,outfit.id);
+      await studioRun('adminChooseOutfit',getToken(),photo.id,outfit.id);
       selectedBefore=outfit.id;msg('บันทึกชุด “'+outfit.name+'” ให้ '+photo.name+' แล้ว · สถานะ: รอการสร้างภาพด้วย AI');
       $('outfitCurrentChoice').textContent='ชุดที่บันทึกไว้: '+outfit.name;
     }catch(e){msg(apiError(e),true);}finally{setBusy(false);renderChoiceList();}
