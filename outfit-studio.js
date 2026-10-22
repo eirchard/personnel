@@ -49,7 +49,7 @@
         <section><p class="outfit-label">เลือกชุดมาตรฐานที่วิทยาลัยกำหนด</p><div class="outfit-choice-grid" id="outfitChoices"></div>
           <p class="outfit-muted" id="outfitCurrentChoice">ยังไม่ได้เลือกชุด</p>
           <div class="outfit-foot"><span class="outfit-muted">เมื่อเลือกแล้วจะบันทึกเป็น “รอเปลี่ยนชุดด้วย AI” โดยไม่แก้ภาพต้นฉบับ</span>
-             <div class="outfit-actions"><button class="outfit-btn" type="button" id="outfitOpenManage">จัดการคลังชุด</button><button class="outfit-btn primary" type="button" id="outfitSaveChoice">บันทึกชุดที่เลือก</button></div></div></section></div>
+             <div class="outfit-actions"><button class="outfit-btn" type="button" id="outfitOpenManage">จัดการคลังชุด</button><button class="outfit-btn primary" type="button" id="outfitSaveChoice">บันทึกชุดที่เลือก</button><button class="outfit-btn" type="button" id="outfitOpenReview">✦ ภาพ AI / อนุมัติ</button></div></div></section></div>
       <div id="outfitManagerView" class="outfit-manager-grid hide">
         <form class="outfit-form" id="outfitCreateForm"><p class="outfit-label">เพิ่มต้นแบบชุดใหม่</p>
           <div class="group"><label for="outfitNewName">ชื่อรูปแบบชุด</label><input id="outfitNewName" type="text" minlength="3" maxlength="80" placeholder="เช่น สูทสีกรมท่า" required></div>
@@ -118,6 +118,7 @@
     $('outfitDialogTitle').textContent='AI Photo Studio';$('outfitSubtitle').textContent='เลือกชุดให้ '+String(record.name||'บุคลากร');
     $('outfitStudioView').classList.remove('hide');$('outfitManagerView').classList.add('hide');
     $('outfitOpenManage').classList.toggle('hide',!canManage());
+    $('outfitOpenReview').classList.remove('hide');
     $('outfitStaffName').textContent=record.name;
     $('outfitOriginalPhoto').replaceChildren(q('span','outfit-loading','กำลังโหลดภาพต้นฉบับ…'));
     noTemplates($('outfitChoices'),'กำลังโหลดคลังชุด…');$('outfitSaveChoice').disabled=true;$('outfitCurrentChoice').textContent='กำลังตรวจสอบชุดที่บันทึกไว้…';
@@ -192,6 +193,7 @@
     }catch(e){msg(apiError(e),true);}finally{setBusy(false);renderChoiceList();}
   });
   $('outfitOpenManage').addEventListener('click',()=>{if(canManage()){close();openManager();}});
+  $('outfitOpenReview').addEventListener('click',()=>{if(canUse()&&photo&&!busy){const current=photo;close();window.PersonnelAIReview?.open(current);}});
   $('outfitClose').addEventListener('click',close);
   panel.addEventListener('click',e=>{if(e.target===panel)close();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&visible&&!busy){e.preventDefault();close();}});
