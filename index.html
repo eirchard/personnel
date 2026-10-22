@@ -141,6 +141,7 @@
       .settings-dialog-body .users-table{min-width:600px}
     }
   </style>
+  <link rel="stylesheet" href="./outfit-studio.css?v=phase1-1">
 </head>
 <body>
   <header class="topbar"><div class="shell">
@@ -571,6 +572,10 @@
         const status=document.createElement('td');const badge=document.createElement('span');badge.className='status-badge '+(record.status==='ใหม่'?'new':'finished');badge.textContent=record.status;status.append(badge);
         const actions=document.createElement('td');const area=document.createElement('div');area.className='table-actions';
         area.append(makeAction('ดูรูป',()=>showImage(record.id),'view'));
+        if(state.role==='owner'||state.role==='editor'){
+          const studio=document.createElement('button');studio.type='button';studio.className='sm-btn outfit';studio.textContent='✦ AI Studio';studio.disabled=state.adminBusy;
+          studio.addEventListener('click',()=>window.PersonnelOutfitStudio?.open(record));area.append(studio);
+        }
         if(state.role==='owner'||state.role==='editor')area.append(makeAction(record.status==='ใหม่'?'เสร็จแล้ว':'ย้อนกลับ',()=>updateStatus(record),record.status==='ใหม่'?'complete':'revert'));
         if(state.role==='owner')area.append(makeAction('ลบ',()=>deleteRecord(record),'danger'));
         actions.append(area);tr.append(checkCell,name,date,status,actions);body.append(tr);
@@ -888,5 +893,6 @@
     });
     initialize();
   </script>
+  <script src="./outfit-studio.js?v=phase1-1"></script>
 </body>
 </html>
