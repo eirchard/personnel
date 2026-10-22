@@ -142,7 +142,7 @@
     }
   </style>
   <link rel="stylesheet" href="./outfit-studio.css?v=phase1-1">
-  <link rel="stylesheet" href="./ai-review.css?v=phase2-1">
+  <link rel="stylesheet" href="./ai-review.css?v=phase2-1-history">
 </head>
 <body>
   <header class="topbar"><div class="shell">
@@ -606,7 +606,7 @@
       const count=mode==='all'?Number($('totalCount').textContent):state.selectedAll?state.matchingCount:state.selection.size;
       if(!count)return;
       const scope=mode==='all'?'ข้อมูลทั้งหมดในระบบ':state.selectedAll?'ทุกรายการที่ตรงกับการค้นหา':'รายการที่เลือก';
-      if(!confirm('คุณกำลังจะลบ '+scope+' จำนวน '+count+' รายการ พร้อมย้ายรูปภาพไปถังขยะ Google Drive\n\nดำเนินการต่อหรือไม่?'))return;
+      if(!confirm('คุณกำลังจะลบ '+scope+' จำนวน '+count+' รายการ รวมข้อมูลประวัติภาพ AI และย้ายไฟล์ที่เกี่ยวข้องไปถังขยะ Google Drive\n\nดำเนินการต่อหรือไม่?'))return;
       const typed=prompt('เพื่อยืนยันการลบ '+count+' รายการ โปรดพิมพ์คำว่า ลบ เพื่อดำเนินการ');
       if(typed!=='ลบ')return;
       const token=state.token;
@@ -669,7 +669,7 @@
     function updateStatus(record){mutateRecord('update',record,record.status==='ใหม่'?'กำลังบันทึกสถานะดำเนินการแล้ว':'กำลังย้อนกลับสถานะ',record.status==='ใหม่'?'ดำเนินการแล้ว':'ใหม่');}
     function deleteRecord(record){
       if(state.adminBusy)return;
-      if(!confirm('ต้องการลบข้อมูลและย้ายรูปภาพของ "'+record.name+'" ไปถังขยะ Google Drive ใช่หรือไม่?'))return;
+      if(!confirm('ต้องการลบข้อมูลของ "'+record.name+'" รวมทั้งประวัติภาพ AI และย้ายไฟล์ภาพต้นฉบับ/ภาพ AI ไปถังขยะ Google Drive ใช่หรือไม่?'))return;
       mutateRecord('delete',record,'กำลังลบรายการ');
     }
     function setModalMessage(message,error=false){
@@ -895,6 +895,6 @@
     initialize();
   </script>
   <script src="./outfit-studio.js?v=phase2-1"></script>
-  <script src="./ai-review.js?v=phase2-1"></script>
+  <script src="./ai-review.js?v=phase2-1-history"></script>
 </body>
 </html>
