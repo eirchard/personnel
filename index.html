@@ -287,7 +287,7 @@
     function rememberedView(){try{return sessionStorage.getItem(LAST_VIEW_KEY)||'public';}catch(_){return 'public';}}
 
     const apiEndpoint = String(window.PERSONNEL_CONFIG?.apiBaseUrl || 'https://personnel-photo-api.muhammadeirchard-m.workers.dev/api').trim();
-    const API_METHODS = new Set(['getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile','adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser','adminDeleteUser','adminList','adminGetImage','adminStorePreview','adminDownloadImage','adminUpdateStatus','adminDelete']);
+    const API_METHODS = new Set(['getAppInfo','saveSubmission','adminLogin','adminLogout','adminProfile','adminChangePassword','adminListUsers','adminCreateUser','adminModifyUser','adminDeleteUser','adminList','adminGetImage','adminStorePreview','adminDownloadImage','adminUpdateStatus','adminDelete','adminListOutfits','adminCreateOutfit','adminRenameOutfit','adminToggleOutfit','adminDeleteOutfit','adminGetPhotoEdit','adminChooseOutfit']);
     async function run(method,...args){
       if(!API_METHODS.has(method))throw new Error('คำสั่งไม่รองรับ');
       const ctrl=new AbortController(),clock=setTimeout(()=>ctrl.abort(),method==='saveSubmission'?115000:65000);
