@@ -7,7 +7,7 @@
   const canOpen=()=>typeof state==='object'&&Boolean(state.token)&&['owner','editor'].includes(state.role);
   const isOwner=()=>canOpen()&&state.role==='owner';
   const token=()=>state.token;
-  let photo=null,latest=null,approved=null,loading=0,busy=false,visible=false,chosenOutfit='',lastFocus=null,editImageId='',approvalShown='';
+  let photo=null,latest=null,approved=null,history=[],viewingId='',loading=0,busy=false,visible=false,chosenOutfit='',lastFocus=null,editImageId='',approvalShown='';
 
   async function rpc(method,...args){
     if(!allow.has(method))throw new Error('ไม่อนุญาตคำสั่ง Phase 2 นี้');
@@ -47,6 +47,12 @@
           <div class="ai2-photo-frame" id="ai2Edited"><span class="ai2-empty">ยังไม่ได้เพิ่มภาพที่ปรับแต่ง</span></div>
           <p class="ai2-photo-foot" id="ai2EditedInfo">โปรดตรวจเครื่องแต่งกาย ใบหน้า และเครื่องหมายให้ถูกต้อง</p></section>
       </div>
+      <section class="ai2-history-panel" aria-labelledby="ai2HistoryTitle">
+        <div class="ai2-history-head"><div><h3 id="ai2HistoryTitle">ประวัติภาพ AI ทุกเวอร์ชัน</h3>
+          <p>คลิกเวอร์ชันเพื่อย้อนดูภาพและผลการตรวจสอบ ข้อมูลเดิมจะไม่ถูกแก้ไข</p></div>
+          <span class="ai2-history-count" id="ai2HistoryCount">0 เวอร์ชัน</span></div>
+        <div class="ai2-history-list" id="ai2History" aria-live="polite"></div>
+      </section>
       <div class="ai2-approved hide" id="ai2ApprovedBox"><span id="ai2ApprovedDescription">มีภาพที่อนุมัติแล้ว</span><button class="ai2-btn outline" type="button" id="ai2Download">ดาวน์โหลดภาพที่อนุมัติ</button></div>
       <div class="ai2-grid">
         <div class="ai2-panel"><h3>นำเข้าภาพที่เปลี่ยนชุดแล้ว</h3>
@@ -75,7 +81,7 @@
     $('ai2File').value='';if(lastFocus?.isConnected)lastFocus.focus();}
   function latestStatusLabel(s){return ({pending:'รอการอนุมัติ',approved:'อนุมัติแล้ว',rejected:'ขอแก้ไข',superseded:'มีภาพเวอร์ชันใหม่'})[s]||'ยังไม่มีภาพ AI';}
   function renderButtons(){
-    const pending=latest?.status==='pending';
+    const pending=latest?.status==='pending'&&viewingId===latest?.id;
     $('ai2Approve').classList.toggle('hide',!isOwner());$('ai2Reject').classList.toggle('hide',!isOwner());
     $('ai2Approve').disabled=busy||!pending||!isOwner();$('ai2Reject').disabled=busy||!pending||!isOwner();
     $('ai2File').disabled=busy;$('ai2Upload').disabled=busy||!chosenOutfit;
@@ -86,12 +92,56 @@
   function showImage(el,data,alternative){const box=$(el);box.replaceChildren();
     if(data){const img=e('img');img.src=data;img.alt=alternative;box.append(img);}
     else box.append(e('span','ai2-empty','ยังไม่มีรูปภาพ'));}
+  function versionDetails(item){
+    return (item.status==='rejected'&&item.reason?'เหตุผลที่ขอแก้ไข: '+item.reason+' · ':'')+
+      'เพิ่มโดย '+(item.createdBy||'-')+' · '+(item.createdAt||'-')+
+      (item.reviewedBy?' · ตรวจโดย '+item.reviewedBy:'');
+  }
+  function renderHistory(){
+    const list=$('ai2History');list.replaceChildren();
+    $('ai2HistoryCount').textContent=history?.length+' เวอร์ชัน';
+    if(history===null){list.append(e('p','ai2-history-empty','ยังไม่สามารถแสดงประวัติย้อนหลังได้ กรุณาติดตั้ง Code.gs Phase 2.1'));return;}
+    if(!history.length){list.append(e('p','ai2-history-empty','ยังไม่มีประวัติภาพ AI สำหรับบุคลากรรายนี้'));return;}
+    history.forEach((item,index)=>{
+      const btn=e('button','ai2-history-item'+(viewingId===item.id?' selected':''));btn.type='button';
+      btn.setAttribute('aria-pressed',String(viewingId===item.id));
+      const img=e('img','ai2-history-thumb');img.src=item.thumbnail||'';img.alt='ภาพ AI เวอร์ชัน '+(history.length-index);img.loading='lazy';
+      const body=e('span','ai2-history-body');
+      body.append(e('strong','',`เวอร์ชัน ${history.length-index} · ${latestStatusLabel(item.status)}`),
+        e('span','',item.createdAt||'ไม่ระบุวันที่'));
+      if(item.status==='rejected'&&item.reason)body.append(e('span','ai2-history-reason','เหตุผล: '+item.reason));
+      const indicator=e('span','ai2-history-indicator',viewingId===item.id?'กำลังดู':'ดูภาพ');
+      btn.append(img,body,indicator);btn.addEventListener('click',()=>viewHistory(item));list.append(btn);
+    });
+  }
+  async function viewHistory(item){
+    if(busy||!visible||!item?.id||viewingId===item.id)return;
+    const request=++loading,previous=viewingId;viewingId=item.id;
+    renderHistory();renderButtons();
+    $('ai2Version').textContent='ภาพเวอร์ชัน '+(history.length-history.findIndex(x=>x.id===item.id));
+    $('ai2EditedInfo').textContent=versionDetails(item);
+    $('ai2Status').textContent=latestStatusLabel(item.status);
+    $('ai2Status').dataset.status=item.status;
+    showImage('ai2Edited',item.thumbnail,'ตัวอย่างภาพ AI เวอร์ชันที่เลือก');
+    message('กำลังโหลดภาพ AI เวอร์ชันที่เลือก…');
+    try{
+      const result=await rpc('adminGetAIReviewImage',token(),item.id);
+      if(request!==loading||!visible)return;
+      if(result?.imageData)showImage('ai2Edited',result.imageData,'ภาพ AI ย้อนหลังขนาดเต็ม');
+      message('กำลังแสดงภาพเวอร์ชัน '+(history.length-history.findIndex(x=>x.id===item.id))+' · ไม่เปลี่ยนผลการอนุมัติ');
+    }catch(err){if(request!==loading||!visible)return;viewingId=previous;
+      $('ai2Status').textContent=latestStatusLabel(latest?.status);
+      $('ai2Status').dataset.status=latest?.status||'none';
+      renderHistory();renderButtons();message('เปิดภาพย้อนหลังไม่สำเร็จ: '+err.message,true);}
+  }
   async function loadReview(request){
     const [result,origin,selection,outfits]=await Promise.all([
       rpc('adminGetAIReview',token(),photo.id),rpc('adminGetImage',token(),photo.id),
       rpc('adminGetPhotoEdit',token(),photo.id),rpc('adminListOutfits',token())]);
     if(request!==loading||!visible)return;
     latest=result.latest;approved=result.approved;
+    history=Array.isArray(result.history)?result.history:null;
+    viewingId=latest?.id||'';
     const selected=selection.edit?.outfitId||'';
     const match=(outfits.items||[]).find(x=>x.id===selected);
     chosenOutfit=match?.active?selected:'';
@@ -103,6 +153,7 @@
     $('ai2EditedInfo').textContent=latest?(latest.status==='rejected'?'เหตุผลที่ขอแก้ไข: '+latest.reason:
       'เพิ่มโดย '+latest.createdBy+' · '+latest.createdAt+(latest.reviewedBy?' · ตรวจโดย '+latest.reviewedBy:'')):'ตรวจใบหน้าและชุดก่อนส่งตรวจทุกครั้ง';
     showImage('ai2Edited',latest?.thumbnail,'รูป AI ที่นำเข้า');
+    renderHistory();
     // Full-resolution file is loaded for reviewers, not just the thumbnail.
     if(latest){
       try{
@@ -118,7 +169,7 @@
   }
   async function open(record){
     if(!canOpen()||!record?.id)return;
-    lastFocus=document.activeElement;photo=record;latest=null;approved=null;chosenOutfit='';editImageId='';approvalShown='';loading++;
+    lastFocus=document.activeElement;photo=record;latest=null;approved=null;history=[];viewingId='';chosenOutfit='';editImageId='';approvalShown='';loading++;
     const request=loading;visible=true;shade.classList.remove('hide');document.body.classList.add('ai2-modal-open');
     clearMessage();$('ai2File').value='';$('ai2Selected').textContent='ยังไม่ได้เลือกไฟล์';
     $('ai2Staff').textContent='บุคลากร: '+record.name;
@@ -184,7 +235,7 @@
   $('ai2FullImage').addEventListener('click',async()=>{
     if(!latest||busy)return;
     busyState(true);message('กำลังเปิดภาพ AI ขนาดเต็ม…');
-    try{const data=await rpc('adminGetAIReviewImage',token(),latest.id);
+    try{const data=await rpc('adminGetAIReviewImage',token(),viewingId||latest.id);
       if(data?.imageData){showImage('ai2Edited',data.imageData,'ภาพ AI ขนาดเต็ม');message('โหลดภาพขนาดเต็มเรียบร้อยแล้ว');}
     }catch(err){message(err.message,true);}finally{busyState(false);}
   });
